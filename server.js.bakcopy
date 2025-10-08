@@ -1,0 +1,314 @@
+require("dotenv").config();
+const express = require("express");
+const session = require("express-session");
+const mysql = require("mysql2/promise");
+const path = require("path");
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || "secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true, sameSite: "lax" }
+}));
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASS || "",
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10
+});
+
+function ensureAuth(req, res, next) {
+  if (!req.session.user) return res.status(401).json({ success: false, message: "Не авторизован" });
+  next();
+}
+
+function ensureRole(...roles) {
+  return (req, res, next) => {
+    if (!req.session.user) return res.status(401).json({ success: false, message: "Не авторизован" });
+    if (!roles.includes(req.session.user.role)) {
+      return res.status(403).json({ success: false, message: "Нет доступа" });
+    }
+    next();
+  };
+}
+
+app.get("/me", (req, res) => {
+  if (!req.session.user) return res.json({ loggedIn: false });
+  res.json({ loggedIn: true, user: req.session.user });
+});
+
+app.post("/register", async (req, res) => {
+  const { username, email, password, role } = req.body;
+  if (!username || !email || !password || !role) {
+    return res.json({ success: false, message: "Заполните все поля" });
+  }
+  try {
+    await pool.query(
+      "INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())",
+      [username, email, password, role]
+    );
+    const [rows] = await pool.query(
+      "SELECT id, username, role FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+    req.session.user = rows[0];
+    req.session.save(() => res.json({ success: true, user: req.session.user }));
+  } catch (err) {
+    res.json({ success: false, message: "Email уже используется" });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const [rows] = await pool.query(
+    "SELECT id, username, email, role, password AS hash, failed_attempts, locked_until FROM users WHERE email = ?",
+    [email]
+  );
+
+  if (!rows.length) return res.json({ success: false, message: "Пользователь не найден" });
+
+  const u = rows[0];
+  const now = new Date();
+
+  if (u.locked_until && new Date(u.locked_until) > now) {
+    const remaining = Math.ceil((new Date(u.locked_until) - now) / 60000);
+    return res.json({
+      success: false,
+      message: `Аккаунт заблокирован. Подождите ${remaining} мин.`,
+      locked: true,
+      remaining
+    });
+  }
+
+  if (password !== u.hash) {
+    const attempts = (u.failed_attempts || 0) + 1;
+    let lockMinutes = 0;
+    if (attempts === 5) lockMinutes = 5;
+    else if (attempts === 6) lockMinutes = 10;
+    else if (attempts === 7) lockMinutes = 15;
+    else if (attempts >= 8) lockMinutes = 30;
+
+    const lockQuery = lockMinutes
+      ? ", locked_until = NOW() + INTERVAL " + lockMinutes + " MINUTE"
+      : "";
+
+    await pool.query(
+      `UPDATE users SET failed_attempts = ?${lockQuery} WHERE id = ?`,
+      [attempts, u.id]
+    );
+
+    const remainingAttempts = Math.max(0, 8 - attempts);
+    return res.json({
+      success: false,
+      message: `Неверный пароль. Осталось попыток: ${remainingAttempts}`,
+      attempts,
+      remainingAttempts
+    });
+  }
+
+  await pool.query(
+    "UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?",
+    [u.id]
+  );
+
+  req.session.user = { id: u.id, username: u.username, role: u.role };
+  req.session.save(() => res.json({ success: true, user: req.session.user }));
+});
+
+app.post("/logout", (req, res) => {
+  req.session.destroy(() => res.json({ success: true }));
+});
+
+app.get("/products", ensureAuth, async (req, res) => {
+  const [rows] = await pool.query("SELECT id, name, sku, price, quantity, created_at FROM products ORDER BY id DESC");
+  res.json(rows);
+});
+app.get("/reports/sales", ensureRole("admin", "cashier", "accountant"), async (req, res) => {
+  const from = req.query.from || null;
+  const to = req.query.to || null;
+
+  let sql = `SELECT s.id, s.user_id, s.total_amount, s.created_at, u.username
+             FROM sales s
+             LEFT JOIN users u ON u.id = s.user_id`;
+  const params = [];
+
+  if (from && to) {
+    sql += " WHERE s.created_at BETWEEN ? AND ?";
+    params.push(from + " 00:00:00", to + " 23:59:59");
+  } else if (from) {
+    sql += " WHERE s.created_at >= ?";
+    params.push(from + " 00:00:00");
+  } else if (to) {
+    sql += " WHERE s.created_at <= ?";
+    params.push(to + " 23:59:59");
+  }
+
+  sql += " ORDER BY s.created_at DESC";
+
+  try {
+    const [rows] = await pool.query(sql, params);
+    res.json({ success: true, rows });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get("/sales/:id", ensureRole("admin", "cashier", "accountant"), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [[sale]] = await pool.query("SELECT id, user_id, total_amount, created_at FROM sales WHERE id = ? LIMIT 1", [id]);
+    if (!sale) return res.status(404).json({ success: false, message: "Чек не найден" });
+
+    const [items] = await pool.query(
+      `SELECT si.id, si.product_id, p.name, p.sku, si.qty, si.price, si.line_total
+       FROM sale_items si
+       LEFT JOIN products p ON p.id = si.product_id
+       WHERE si.sale_id = ?`,
+      [id]
+    );
+
+    res.json({ success: true, sale, items });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+
+app.post("/products", ensureRole("admin", "worker"), async (req, res) => {
+  const { name, sku, price, quantity } = req.body;
+  if (!name || !price || !quantity) {
+    return res.json({ success: false, message: "Заполните обязательные поля" });
+  }
+  try {
+    await pool.query(
+      "INSERT INTO products (name, sku, price, quantity, created_at) VALUES (?, ?, ?, ?, NOW())",
+      [name, sku || null, price, quantity]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, message: "Ошибка при добавлении товара" });
+  }
+});
+
+app.put("/products/:id", ensureRole("admin", "worker"), async (req, res) => {
+  const { name, sku, price, quantity } = req.body;
+  const { id } = req.params;
+  if (!name || !price || !quantity) {
+    return res.json({ success: false, message: "Заполните обязательные поля" });
+  }
+  try {
+    await pool.query(
+      "UPDATE products SET name = ?, sku = ?, price = ?, quantity = ? WHERE id = ?",
+      [name, sku || null, price, quantity, id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, message: "Ошибка при обновлении товара" });
+  }
+});
+
+app.delete("/products/:id", ensureRole("admin"), async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query("DELETE FROM products WHERE id = ?", [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, message: "Ошибка при удалении товара" });
+  }
+});
+
+app.get("/search", ensureAuth, async (req, res) => {
+  const { q } = req.query;
+  const term = `%${q || ""}%`;
+  const [rows] = await pool.query(
+    "SELECT id, name, sku, price, quantity, created_at FROM products WHERE name LIKE ? OR sku LIKE ? ORDER BY id DESC",
+    [term, term]
+  );
+  res.json(rows);
+});
+
+app.post("/sales", ensureRole("cashier", "admin"), async (req, res) => {
+  const { items } = req.body;
+  if (!items || !items.length) return res.status(400).json({ success: false, message: "Пустой чек" });
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const [saleResult] = await conn.query(
+      "INSERT INTO sales (user_id, total_amount, created_at) VALUES (?, 0.00, NOW())",
+      [req.session.user?.id || null]
+    );
+    const saleId = saleResult.insertId;
+    let total = 0;
+
+    for (const item of items) {
+      const product_id = parseInt(item.product_id, 10);
+      const quantity = parseInt(item.quantity, 10);
+      if (!product_id || !quantity || quantity <= 0) throw new Error("Некорректная позиция");
+
+      const [rows] = await conn.query(
+        "SELECT id, name, price, quantity FROM products WHERE id = ? FOR UPDATE",
+        [product_id]
+      );
+      if (!rows.length) throw new Error("Товар не найден");
+      const p = rows[0];
+      if (p.quantity < quantity) throw new Error("Недостаточно товара на складе");
+
+      const lineTotal = Number(p.price) * quantity;
+      total += lineTotal;
+
+      await conn.query(
+        "INSERT INTO sale_items (sale_id, product_id, qty, price, line_total) VALUES (?, ?, ?, ?, ?)",
+        [saleId, product_id, quantity, p.price, lineTotal]
+      );
+
+      await conn.query(
+        "UPDATE products SET quantity = quantity - ? WHERE id = ?",
+        [quantity, product_id]
+      );
+
+      await conn.query(
+        "INSERT INTO inventory_movements (product_id, qty, movement_type, ref_table, ref_id, user_id, note) VALUES (?, ?, 'out', 'sales', ?, ?, ?)",
+        [product_id, quantity, saleId, req.session.user?.id || null, null]
+      );
+    }
+
+    await conn.query("UPDATE sales SET total_amount = ? WHERE id = ?", [total, saleId]);
+
+    await conn.query(
+      "INSERT INTO transactions (type, ref_id, user_id, total, meta) VALUES (?, ?, ?, ?, ?)",
+      ['sale', saleId, req.session.user?.id || null, total, JSON.stringify({ items })]
+    );
+
+    await conn.commit();
+    res.json({ success: true, saleId, total: total.toFixed(2) });
+  } catch (err) {
+    await conn.rollback();
+    res.status(400).json({ success: false, message: err.message || "Ошибка при оформлении чека" });
+  } finally {
+    conn.release();
+  }
+});
+
+app.get("/users", ensureRole("admin"), async (req, res) => {
+  const [rows] = await pool.query(
+    "SELECT id, username, email, role, created_at FROM users ORDER BY id DESC"
+  );
+  res.json(rows);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Сервер запущен на http://localhost:${PORT}`);
+});

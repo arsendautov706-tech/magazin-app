@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      margin: auto;
+      background: rgba(255,255,255,0.08);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      width: 90%;
+      max-width: 1000px;
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+    h1, h2 {
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #00f2fe;
+      text-shadow: 0 0 10px rgba(0, 242, 254, 0.8), 0 0 20px rgba(0, 242, 254, 0.6);
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+      transition: box-shadow 0.3s;
+    }
+    input:focus {
+      box-shadow: 0 0 12px #00f2fe, inset 0 0 8px rgba(0,0,0,0.6);
+    }
+    button, .btn, .toggle-btn {
+      margin-top: 15px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+      transition: all 0.3s ease;
+    }
+    button:hover, .btn:hover, .toggle-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 6px 20px rgba(0, 242, 254, 0.6);
+      background: linear-gradient(135deg, #43e97b, #38f9d7);
+    }
+    button:active, .btn:active, .toggle-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .admin-menu .btn.active,
+    .admin-menu .toggle-btn.active {
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
+      box-shadow: 0 0 20px rgba(255, 94, 98, 0.7);
+    }
+    .admin-menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .table th, .table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .table th {
+      background: rgba(0, 242, 254, 0.15);
+      color: #00f2fe;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .table tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    a {
+      color: #00f2fe;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    a:hover {
+      color: #43e97b;
+      text-decoration: underline;
+    }
+    .hidden {
+      display: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Панель администратора</h1>
+    <div class="admin-menu">
+      <button class="toggle-btn" data-target="reports">📑 Отчёты</button>
+      <button class="toggle-btn" data-target="inventory">📦 Склад</button>
+      <button class="toggle-btn" data-target="users">👥 Пользователи</button>
+      <button class="toggle-btn" data-target="notifications">🔔 Уведомления</button>
+      <a href="/dashboard.html" class="btn">📊 Дашборд</a>
+      <a href="/logout" class="btn">🚪 Выйти</a>
+    </div>
+    <section id="reports" class="admin-section hidden">
+      <h2>Отчёты</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Кассир</th>
+            <th>Сумма</th>
+            <th>Файл</th>
+          </tr>
+        </thead>
+        <tbody id="reportsList"></tbody>
+      </table>
+    </section>
+    <section id="inventory" class="admin-section hidden">
+      <h2>Склад</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Кол-во</th>
+            <th>Цена</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTable"></tbody>
+      </table>
+    </section>
+    <section id="users" class="admin-section hidden">
+      <h2>Пользователи</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Email</th>
+            <th>Роль</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="usersList"></tbody>
+      </table>
+    </section>
+    <section id="notifications" class="admin-section hidden">
+      <h2>Уведомления</h2>
+      <button onclick="loadNotifications()">🔄 Обновить</button>
+      <ul id="notificationsList"></ul>
+    </section>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const section = document.getElementById(targetId);
+          if (section) {
+            section.classList.toggle('hidden');
+            btn.classList.toggle('active');
+          }
+        });
+      });
+    });
+
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const users = await res.json();
+      const tbody = document.getElementById('usersList');
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.email}</td>
+            <td>${u.role}</td>
+            <td><button>Удалить</button></td>
+          </tr>`;
+      });
+    }
+
+    async function loadInventory() {
+      const res = await fetch('/api/inventory');
+      const items = await res.json();
+      const tbody = document.getElementById('inventoryTable');
+      tbody.innerHTML = '';
+      items.forEach(i => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i.id}</td>
+            <td>${i.name}</td>
+            <td>${i.qty}</td>
+            <td>${i.price}</td>
+            <td><button>Редактировать</button></td>
+          </tr>`;
+      });
+    }
+
+    document.querySelector('[data-target="users"]').addEventListener('click', loadUsers);
+    document.querySelector('[data-target="inventory"]').addEventListener('click', loadInventory);
+  </script>
+</body>
+</html>

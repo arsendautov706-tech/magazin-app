@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEON POS — Кассир</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="card" style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="header-logo">NEON POS — Кассир</div>
+    <div style="display:flex;gap:8px;">
+      <a href="/reports.html" class="btn" style="text-decoration:none;padding:10px 12px;">Отчёты</a>
+      <a href="/logout" class="btn" style="text-decoration:none;padding:10px 12px;">Выход</a>
+    </div>
+  </header>
+
+  <main style="max-width:1100px;margin:18px auto;">
+    <section class="card">
+      <h2>Точка продаж</h2>
+      <div id="pos-root">Загрузка POS...</div>
+    </section>
+  </main>
+
+  <script src="/js/pos.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/common.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
+

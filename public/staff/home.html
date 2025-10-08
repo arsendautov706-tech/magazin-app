@@ -1,0 +1,20 @@
+<!doctype html>
+<html data-role="worker" lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Staff Home</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <script src="/js/protect.js"></script>
+  <main>
+    <h1>Рабочая панель</h1>
+    <p><a href="/logout">Выйти</a></p>
+    <section id="workerArea">Загрузка...</section>
+  </main>
+  <script>
+    (async function(){ const r = await fetch('/session',{credentials:'include'}); if(r.ok){ const j = await r.json(); const p = await fetch('/products'); const items = await p.json(); document.getElementById('workerArea').innerText = 'Товаров: ' + (items.length||0); }})();
+  </script>
+</body>
+</html>

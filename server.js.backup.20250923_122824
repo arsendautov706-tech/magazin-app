@@ -1,0 +1,30 @@
+﻿/**
+ * TEMP minimal server.js
+ * Serves static files from /public so you can continue working while we fix original server.js.
+ * Replace with your original server.js later.
+ */
+const express = require('express');
+const path = require('path');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// simple JSON endpoints to avoid 404s for common checks (stubs)
+app.get('/me', (req, res) => res.json({ loggedIn: false }));
+app.get('/products', (req, res) => res.json([]));
+app.post('/login', express.json(), (req, res) => res.json({ success: false, message: 'Temp server' }));
+
+app.listen(PORT, () => console.log(`TEMP server listening on http://localhost:${PORT}`));
+/**
+ * AUTO-APPEND: safe file ending to restore syntactic correctness
+ * If your original file had additional routes below, restore them from server.js.bak or server.js.failed.
+ */
+ 
+// fallback error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error', err && err.stack ? err.stack : err);
+  res.status(500).json({ success: false, message: 'Server error' });
+});
+
+

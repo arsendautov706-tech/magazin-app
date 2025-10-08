@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Склад — NEON POS</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="card" style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="header-logo">Склад</div>
+    <div style="display:flex;gap:8px;">
+      <a href="/dashboard.html" class="btn">Дашборд</a>
+      <a href="/logout" class="btn">Выход</a>
+    </div>
+  </header>
+
+  <main style="max-width:1100px;margin:18px auto;">
+    <section class="card">
+      <h2>Товары</h2>
+      <div id="products-root">Загрузка...</div>
+      <div id="admin-product-form" style="display:none;margin-top:12px;">
+        <h4>Добавить / изменить</h4>
+        <input id="p-name" class="input" placeholder="Название" />
+        <input id="p-sku" class="input" placeholder="SKU" />
+        <input id="p-price" class="input" placeholder="Цена" />
+        <input id="p-qty" class="input" placeholder="Количество" />
+        <button id="p-save" class="btn">Сохранить</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/products.js"></script>
+  <script src="/js/common.js"></script>
+
+<script src="/js/dashboard.js"></script>
+<script src="/js/dashboard.js"></script>
+  <script src="/js/admin.js"></script></body>
+</html>
+
+</script>

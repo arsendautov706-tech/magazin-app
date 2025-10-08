@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Дашборд</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-theme">
+  <div class="topbar">
+    <div class="brand">📊 Дашборд</div>
+    <nav>
+      <a class="nav-link" href="/admin.html">⬅️ Назад в админку</a>
+      <a class="nav-link" href="/logout">🚪 Выйти</a>
+    </nav>
+  </div>
+
+  <main class="container">
+    <div class="panel">
+      <h2 id="welcomeText">Добро пожаловать в дашборд</h2>
+      <button id="loadStats" class="neon-btn">📊 Показать статистику</button>
+      <div id="statsBox" class="fade-in">Нажмите кнопку, чтобы загрузить статистику</div>
+      <canvas id="statsChart" width="400" height="200" style="margin-top:30px"></canvas>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">✅ Статистика загружена!</div>
+  <script src="/js/dashboard.js" defer></script>
+</body>
+</html>

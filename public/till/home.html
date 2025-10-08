@@ -1,0 +1,35 @@
+<!doctype html>
+<html data-role="cashier" lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Till Home</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <script src="/js/protect.js"></script>
+  <main>
+    <h1>POS / Касса</h1>
+    <p><a href="/logout">Выйти</a></p>
+    <div id="posArea">
+      <p>Интерфейс кассы</p>
+      <button id="sendReport">Отправить отчет за смену</button>
+    </div>
+  </main>
+  <script>
+    document.getElementById('sendReport')?.addEventListener('click', async ()=>{
+      const lines = [{ sku: 'SKU1', name: 'Товар1', qty: 2, sum: 200 }];
+      const totals = { total: 200, payments: { cash: 200 } };
+      const date = new Date().toISOString().slice(0,10);
+      const res = await fetch('/reports/daily', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ date, totals, lines }) });
+      const j = await res.json();
+      if (res.ok && j && j.success) {
+        const a = document.createElement('a'); a.href = j.download; document.body.appendChild(a); a.click(); a.remove();
+        alert('Отчёт отправлен и прикреплен админам');
+        return;
+      }
+      alert(j && j.message ? j.message : 'Ошибка при отправке отчёта');
+    });
+  </script>
+</body>
+</html>

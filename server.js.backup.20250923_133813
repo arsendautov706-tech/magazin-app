@@ -1,0 +1,102 @@
+﻿﻿require('dotenv').config();
+const express = require('express');
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const mysql = require('mysql2/promise');
+const path = require('path');
+const htmlDocx = require('html-docx-js');
+const bcrypt = require('bcrypt');
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT,10) : 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'shopdb'
+});
+
+app.use(session({
+  key: 'connect.sid',
+  secret: process.env.SESSION_SECRET || 'change_this_to_strong_secret',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24*60*60*1000, httpOnly: true, sameSite: 'lax', secure: false }
+}));
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'shopdb',
+  waitForConnections: true,
+  connectionLimit: 10
+});
+
+app.use((req,res,next) => {
+  console.log(new Date().toISOString(), req.method, req.url, 'sessionUser=', !!(req.session && req.session.user));
+  next();
+});
+
+function ensureAuth(req,res,next){
+  if (req.session && req.session.user) return next();
+  return res.status(401).json({ success:false, message:'Не авторизован' });
+}
+function ensureRole(...roles) {
+  return (req,res,next) => {
+    if (!req.session || !req.session.user) return res.status(401).json({ success:false, message:'Не авторизован' });
+    if (roles.length===0 || roles.includes(req.session.user.role)) return next();
+    return res.status(403).json({ success:false, message:'Нет прав' });
+  };
+}
+
+// AUTH
+app.post('/login', async (req,res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ success:false, message:'Missing credentials' });
+    const [rows] = await pool.query('SELECT id, username, password, role FROM users WHERE email = ? LIMIT 1', [email]);
+    if (!rows || rows.length === 0) return res.status(401).json({ success:false, message:'Invalid credentials' });
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password || '');
+    if (!match) return res.status(401).json({ success:false, message:'Invalid credentials' });
+    req.session.user = { id: user.id, username: user.username, role: user.role };
+    res.json({ success:true, user: req.session.user });
+  } catch(err) {
+    console.error('ERR /login', err && err.stack ? err.stack : err);
+    res.status(500).json({ success:false, message:'Server error' });
+  }
+});
+
+app.get('/me', (req,res) => {
+  if (req.session && req.session.user) return res.json({ loggedIn:true, user:req.session.user });
+  return res.json({ loggedIn:false });
+});
+
+// USERS (admin)
+app.get('/users', ensureRole('admin'), async (req,res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, username, email, role, created_at FROM users ORDER BY id DESC');
+    res.json(rows);
+  } catch(err) {
+    console.error('ERR /users', err && err.stack ? err.stack : err);
+    res.status(500).json({ success:false, message:err.message });
+  }
+});
+
+// Simple fallback and health
+app.get('/health', (req,res) => res.json({ ok:true }));
+
+// error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error', err && err.stack ? err.stack : err);
+  res.status(500).json({ success:false, message:'Server error' });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));

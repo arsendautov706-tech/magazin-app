@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru" data-role="worker">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Работник склада</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/protect.js"></script>
+</head>
+<body class="worker-theme">
+  <div class="topbar">
+    <div class="brand">📦 Панель работника склада</div>
+    <nav>
+      <button onclick="showSection('inventoryBox')">Склад</button>
+      <button onclick="showSection('reportBox')">Сформировать отчёт</button>
+      <a class="nav-link" href="/logout">Выйти</a>
+    </nav>
+  </div>
+
+  <main class="container">
+    <section id="inventoryBox" class="panel">
+      <h2>📦 Склад</h2>
+      <form id="addForm">
+        <input type="text" id="name" placeholder="Название товара" required>
+        <input type="number" id="qty" placeholder="Количество" required>
+        <input type="number" step="0.01" id="price" placeholder="Цена" required>
+        <button type="submit">➕ Добавить в склад</button>
+      </form>
+      <table id="inventoryTable"><tbody></tbody></table>
+    </section>
+
+    <section id="reportBox" class="panel" style="display:none">
+      <h2>📝 Сформировать отчёт</h2>
+      <button onclick="closeInventoryShift()">Сформировать отчёт по завозу</button>
+      <div id="reportResult"></div>
+    </section>
+  </main>
+
+  <script src="/js/worker.js"></script>
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+  </script>
+</body>
+</html>

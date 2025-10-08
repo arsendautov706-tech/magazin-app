@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Склад / Продажа</title>
+  <style>
+    body { font-family: Arial; padding: 30px; }
+    input, button { margin: 5px; padding: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Склад / Продажа</h1>
+
+  <div>
+    <input id="sellProductId" type="number" placeholder="ID товара">
+    <input id="sellQty" type="number" placeholder="Количество">
+    <button id="sellBtn">Продать</button>
+    <p id="sellStatus"></p>
+  </div>
+
+  <h2>Корзина</h2>
+  <div id="cart"></div>
+  <p>Итого: <span id="cartTotal">0</span> ₽</p>
+  <button id="checkoutBtn">Оформить чек</button>
+  <p id="checkoutStatus"></p>
+
+  <h2>Поиск товара</h2>
+  <input id="search" type="text" placeholder="Поиск по названию">
+  <div id="catalog"></div>
+
+  <h2>Возврат</h2>
+  <input id="returnProductId" type="number" placeholder="ID товара">
+  <input id="returnQty" type="number" placeholder="Количество">
+  <button id="returnBtn">Оформить возврат</button>
+  <p id="returnStatus"></p>
+
+  <h2>Приход</h2>
+  <input id="incomeProductId" type="number" placeholder="ID товара">
+  <input id="incomeQty" type="number" placeholder="Количество">
+  <button id="incomeBtn">Добавить приход</button>
+  <p id="incomeStatus"></p>
+
+  <button id="toggleProductsBtn">Список товаров</button>
+  <div id="products" style="display:none;"></div>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>
+
