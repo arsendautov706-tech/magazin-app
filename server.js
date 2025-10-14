@@ -12,7 +12,6 @@ if (!fs.existsSync(reportsDir)) {
 }
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -70,46 +69,61 @@ app.get('*', (req, res, next) => {
 const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'KARAKOL2025%',
-  database: 'SHOPDB'
+  password: 'KARAKOL2025', 
+  database: 'shopdb'
 });
 
 function generateReport(filename, cashier, items) {
   const filePath = path.join(__dirname, 'reports', filename);
   const doc = new PDFDocument({ margin: 40, size: 'A4' });
+
   doc.pipe(fs.createWriteStream(filePath));
-  doc.fontSize(20).text('Отчёт по завозу', { align: 'center' });
+
+  // Заголовок
+  doc.fontSize(18).text('📦 Отчёт по поступлению товаров', { align: 'center' });
   doc.moveDown();
-  doc.fontSize(12).text(`Работник склада: ${cashier}`);
-  doc.text(`Дата: ${new Date().toLocaleString()}`);
-  doc.moveDown(2);
+  doc.fontSize(12).text(`Дата формирования: ${new Date().toLocaleString()}`);
+  doc.text(`Ответственный сотрудник: ${cashier}`);
+  doc.moveDown();
+
+  // Заголовки таблицы
   const tableTop = doc.y;
-  doc.fontSize(12).text('Товар', 40, tableTop);
+  doc.font('Helvetica-Bold');
+  doc.text('Наименование', 40, tableTop);
   doc.text('Кол-во', 240, tableTop);
-  doc.text('Цена', 320, tableTop);
-  doc.text('Сумма', 400, tableTop);
+  doc.text('Цена', 300, tableTop);
+  doc.text('Сумма', 380, tableTop);
+  doc.font('Helvetica');
+
   let y = tableTop + 20;
   let total = 0;
-  items.forEach(item => {
-    const qty = Number(item.qty) || 0;
+
+  items.forEach((item, index) => {
+    const name = item.name || 'Без названия';
+    const qty = Number(item.quantity) || 0;
     const price = Number(item.price) || 0;
     const sum = qty * price;
     total += sum;
-    doc.text(item.name, 40, y, { width: 180 });
+
+    doc.text(`${index + 1}. ${name}`, 40, y, { width: 180 });
     doc.text(qty.toString(), 240, y);
-    doc.text(price.toFixed(2), 320, y);
-    doc.text(sum.toFixed(2), 400, y);
+    doc.text(price.toFixed(2), 300, y);
+    doc.text(sum.toFixed(2), 380, y);
     y += 20;
   });
+
+  // Итого
   doc.moveDown(2);
-  doc.fontSize(14).text(`Итого: ${total.toFixed(2)} сом`, { align: 'right' });
+  doc.fontSize(13).font('Helvetica-Bold').text(`Итого: ${total.toFixed(2)} сом`, { align: 'right' });
+
+  // Подвал
   doc.moveDown(3);
-  doc.fontSize(10).text('Система учёта v1.0 © 2025', { align: 'center' });
+  doc.fontSize(10).font('Helvetica-Oblique').text('Система учёта склада • Версия 1.0 • © 2025', { align: 'center' });
+
   doc.end();
   return `/reports/${filename}`;
 }
 
-module.exports = generateReport;
 
 app.get('/cashier', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'cashier') {
@@ -122,33 +136,30 @@ app.get('/cashier', (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const { email, username, password } = req.body;
-  const loginField = email || username;
-
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1',
-      [loginField, loginField]
-    );
+    console.log('Login request:', req.body);
 
+    const { email, password } = req.body;
+
+    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     if (rows.length === 0) {
-      return res.json({ success: false, message: 'Неверный логин или пароль' });
+      return res.status(401).json({ success: false, message: 'Пользователь не найден' });
     }
 
     const user = rows[0];
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.json({ success: false, message: 'Неверный логин или пароль' });
+      return res.status(401).json({ success: false, message: 'Неверный пароль' });
     }
 
-    req.session.user = { id: user.id, username: user.username, role: user.role };
-
-    res.json({ success: true, user: { role: user.role } });
+    req.session.user = { id: user.id, role: user.role };
+    res.json({ success: true, user: req.session.user });
   } catch (err) {
-    console.error('Ошибка входа:', err);
+    console.error('Login error:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
 
 
 app.get('/session', (req, res) => {
@@ -192,60 +203,52 @@ function requireRole(allowedRoles) {
     next();
   };
 }
-app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'register.html'));
-});
-
 app.post('/register', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
+    console.log('Регистрация:', req.body);
 
-    if (!username || !email || !password || !role) {
-      return res.json({ success: false, message: 'Все поля обязательны' });
-    }
-
-    const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+    // 🔍 Проверка: существует ли пользователь с таким username или email
+    const [existing] = await db.query(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email]
+    );
     if (existing.length > 0) {
-      return res.json({ success: false, message: 'Email уже зарегистрирован' });
+      return res.status(409).json({
+        success: false,
+        message: 'Пользователь с таким именем или email уже существует'
+      });
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    // 🔐 Хэширование пароля
+    const hashed = await bcrypt.hash(password, 10);
+
+    // ✅ Вставка нового пользователя
     await db.query(
       'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
-      [username, email, hash, role]
+      [username, email, hashed, role || 'cashier']
     );
 
-    res.json({ success: true, message: '✅ Пользователь зарегистрирован' });
+    res.json({ success: true, message: 'Регистрация успешна' });
   } catch (err) {
-    console.error('Ошибка регистрации:', err);
-    res.json({ success: false, message: 'Ошибка при регистрации' });
+    console.error('❌ Ошибка при регистрации:', err);
+
+    // 💬 Обработка ошибки дубликата
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: 'Такой пользователь уже существует'
+      });
+    }
+
+    // 💬 Общая ошибка
+    res.status(500).json({
+      success: false,
+      message: 'Ошибка сервера при регистрации'
+    });
   }
 });
 
-
-app.get('/admin/home.html', requireRole(['admin']), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'admin', 'home.html'));
-});
-app.get('/cashier.html', requireRole(['cashier']), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'cashier.html'));
-});
-app.get('/products.html', requireRole(['worker', 'admin']), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'products.html'));
-});
-app.get('/admin_reports.html', requireRole(['admin']), (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'admin_reports.html'));
-});
-
-app.get('/inventory/items', requireRole(['admin','worker','cashier']), async (req, res) => {
-  try {
-    const [rows] = await db.query(
-      'SELECT id, name, quantity, price, sku FROM products ORDER BY name ASC'
-    );
-    res.json({ success: true, items: rows });
-  } catch {
-    res.status(500).json({ success: false });
-  }
-});
 app.get('/api/users', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, username, email, role FROM users');
@@ -273,6 +276,16 @@ app.get('/api/inventory', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении склада' });
   }
 });
+app.get('/inventory/items', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, name, quantity, price FROM inventory');
+    res.json({ success: true, items: rows });
+  } catch (err) {
+    console.error('❌ Ошибка при получении инвентаря:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 
 
 
@@ -370,40 +383,61 @@ app.get('/inventory/search', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-// Добавление товара
 app.post('/api/inventory/add', async (req, res) => {
   try {
     const { name, qty, price } = req.body;
-    await db.query('INSERT INTO inventory (name, qty, price) VALUES (?, ?, ?)', [name, qty, price]);
-    res.json({ success: true, message: 'Товар добавлен' });
+
+    await db.query(
+      'INSERT INTO inventory (name, quantity, price) VALUES (?, ?, ?)',
+      [name, qty, price]
+    );
+
+    res.json({ success: true, message: '✅ Товар добавлен' });
   } catch (err) {
-    console.error('Ошибка при добавлении товара:', err);
-    res.status(500).json({ error: 'Ошибка при добавлении товара' });
+    console.error('❌ Ошибка при добавлении товара:', err);
+    res.status(500).json({ success: false, message: 'Ошибка при добавлении товара' });
   }
 });
 
-// Закрытие смены склада (отчёт по завозу)
+
 app.post('/api/close-shift', async (req, res) => {
   try {
     const { cashier } = req.body;
-    const [items] = await db.query('SELECT name, qty, price FROM inventory WHERE soft_deleted = 0');
+
+
+    const [items] = await db.query('SELECT name, quantity, price FROM inventory');
+
+    console.log('📦 Полученные items:', items);
+
+
     const filename = `supply_report_${Date.now()}.pdf`;
-    const reportPath = generateReport(filename, cashier, items);
+
+    let reportPath = '';
+    try {
+      reportPath = generateReport(filename, cashier, items);
+    } catch (err) {
+      console.error('❌ Ошибка внутри generateReport:', err);
+      return res.status(500).json({ error: 'Ошибка генерации PDF' });
+    }
+
+    const total = items.reduce((sum, i) => {
+      const qty = Number(i.quantity) || 0;
+      const price = Number(i.price) || 0;
+      return sum + qty * price;
+    }, 0);
 
     await db.query('INSERT INTO reports (cashier, total, file) VALUES (?, ?, ?)', [
       cashier,
-      items.reduce((sum, i) => sum + i.qty * i.price, 0),
+      total,
       filename
     ]);
-
     res.json({ success: true, file: reportPath });
   } catch (err) {
-    console.error('Ошибка при формировании отчёта:', err);
+    console.error('❌ Ошибка при формировании отчёта:', err.message, err.stack);
+
     res.status(500).json({ error: 'Ошибка при формировании отчёта' });
   }
 });
-
-
 
 app.post('/sales/sell', requireRole(['cashier']), async (req, res) => {
   try {
@@ -558,9 +592,45 @@ app.get('/admin/users', requireRole(['admin']), async (req, res) => {
 });
 
 app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
-  const { userId } = req.body;
-  await db.query('DELETE FROM users WHERE id = ?', [userId]);
-  res.json({ success: true });
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'Не передан ID пользователя' });
+    }
+
+    const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Ошибка при удалении пользователя:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера при удалении' });
+  }
+});
+
+app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'Не передан ID пользователя' });
+    }
+
+    const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Пользователь не найден' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Ошибка при удалении пользователя:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера при удалении' });
+  }
 });
 
 app.get('/dashboard/stats', async (req, res) => {
