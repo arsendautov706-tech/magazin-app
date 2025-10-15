@@ -27,20 +27,20 @@ if (!fs.existsSync(reportsDir)) {
 } else {
   console.log('📁 Папка reports уже существует');
 }
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false
 }));
+
 app.use('/reports', express.static(reportsDir));
 app.use(express.static(path.join(__dirname, 'public')));
-
 const csp = {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", 'unsafe-eval', 'data:', 'blob:'],
+  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'data:'", "'blob:'"],
   styleSrc: ["'self'", "'unsafe-inline'"]
 };
 
@@ -48,7 +48,12 @@ app.use(require('helmet')({
   contentSecurityPolicy: { directives: csp }
 }));
 
+app.use(require('helmet')({
+  contentSecurityPolicy: { directives: csp }
+}));
+
 console.log('🚀 Express и middleware инициализированы');
+
 
 const isDev = process.env.NODE_ENV !== 'production';
 const devCsp = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;";
