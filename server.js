@@ -1,28 +1,55 @@
 const express = require('express');
 const session = require('express-session');
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcrypt');
-const path = require('path');
 const fs = require('fs');
-const PDFDocument = require('pdfkit');
+const path = require('path');
+require('dotenv').config();
+const { Pool } = require('pg');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const db = new Pool({
+  host: process.env.PGHOST,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  port: process.env.PGPORT,
+  ssl: { rejectUnauthorized: false }
+});
+
+db.connect()
+  .then(() => console.log('✅ PostgreSQL подключен'))
+  .catch(err => console.error('❌ Ошибка PostgreSQL:', err));
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
-  fs.mkdirSync(reportsDir, { recursive: true });
+  fs.mkdirSync(reportsDir);
+  console.log('📁 Папка reports создана');
+} else {
+  console.log('📁 Папка reports уже существует');
 }
 
-const app = express();
-
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/reports', express.static(reportsDir));
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.json());
 app.use(session({
-  secret: 'supersecret',
+  secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false
 }));
+app.use('/reports', express.static(reportsDir));
+app.use(express.static(path.join(__dirname, 'public')));
+
+const csp = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'", 'unsafe-eval', 'data:', 'blob:'],
+  styleSrc: ["'self'", "'unsafe-inline'"]
+};
+
+app.use(require('helmet')({
+  contentSecurityPolicy: { directives: csp }
+}));
+
+console.log('🚀 Express и middleware инициализированы');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const devCsp = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;";
@@ -31,19 +58,15 @@ const cspHeader = isDev ? devCsp : prodCsp;
 
 app.use((req, res, next) => {
   res.removeHeader("Content-Security-Policy");
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-  );
+  res.setHeader("Content-Security-Policy", "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;");
   next();
 });
+
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
   res.removeHeader("Content-Security-Policy");
   res.setHeader("Content-Security-Policy", "default-src *; connect-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline';");
   res.json({ status: "ok" });
 });
-
-
 
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
@@ -66,27 +89,18 @@ app.get('*', (req, res, next) => {
   }
 });
 
-const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'KARAKOL2025', 
-  database: 'shopdb'
-});
-
 function generateReport(filename, cashier, items) {
   const filePath = path.join(__dirname, 'reports', filename);
   const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
   doc.pipe(fs.createWriteStream(filePath));
 
-  // Заголовок
   doc.fontSize(18).text('📦 Отчёт по поступлению товаров', { align: 'center' });
   doc.moveDown();
   doc.fontSize(12).text(`Дата формирования: ${new Date().toLocaleString()}`);
   doc.text(`Ответственный сотрудник: ${cashier}`);
   doc.moveDown();
 
-  // Заголовки таблицы
   const tableTop = doc.y;
   doc.font('Helvetica-Bold');
   doc.text('Наименование', 40, tableTop);
@@ -112,11 +126,9 @@ function generateReport(filename, cashier, items) {
     y += 20;
   });
 
-  // Итого
   doc.moveDown(2);
   doc.fontSize(13).font('Helvetica-Bold').text(`Итого: ${total.toFixed(2)} сом`, { align: 'right' });
 
-  // Подвал
   doc.moveDown(3);
   doc.fontSize(10).font('Helvetica-Oblique').text('Система учёта склада • Версия 1.0 • © 2025', { align: 'center' });
 
@@ -124,41 +136,50 @@ function generateReport(filename, cashier, items) {
   return `/reports/${filename}`;
 }
 
-
 app.get('/cashier', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'cashier') {
-    return res.redirect('/login.html'); // защита: неавторизованных и не кассиров отправляем на логин
+    return res.redirect('/login.html');
   }
   res.sendFile(path.join(__dirname, 'public', 'cashier.html'));
 });
 
 
-
-
 app.post('/login', async (req, res) => {
   try {
-    console.log('Login request:', req.body);
+    console.log('📥 Login request body:', req.body);
 
     const { email, password } = req.body;
+    if (!email || !password) {
+      console.warn('⚠️ Email или пароль не переданы');
+      return res.status(400).json({ success: false, message: 'Email и пароль обязательны' });
+    }
 
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const rows = result.rows;
+    console.log('🔍 Найденные пользователи:', rows);
+
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Пользователь не найден' });
     }
 
     const user = rows[0];
     const match = await bcrypt.compare(password, user.password);
+    console.log('🔐 Пароль совпадает:', match);
+
     if (!match) {
       return res.status(401).json({ success: false, message: 'Неверный пароль' });
     }
 
     req.session.user = { id: user.id, role: user.role };
+    console.log('✅ Авторизация успешна:', req.session.user);
+
     res.json({ success: true, user: req.session.user });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('❌ Login error:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
 
 
 
@@ -208,11 +229,12 @@ app.post('/register', async (req, res) => {
     const { username, email, password, role } = req.body;
     console.log('Регистрация:', req.body);
 
-    // 🔍 Проверка: существует ли пользователь с таким username или email
-    const [existing] = await db.query(
-      'SELECT * FROM users WHERE username = ? OR email = ?',
+    const result = await db.query(
+      'SELECT * FROM users WHERE username = $1 OR email = $2',
       [username, email]
     );
+    const existing = result.rows;
+
     if (existing.length > 0) {
       return res.status(409).json({
         success: false,
@@ -220,12 +242,10 @@ app.post('/register', async (req, res) => {
       });
     }
 
-    // 🔐 Хэширование пароля
     const hashed = await bcrypt.hash(password, 10);
 
-    // ✅ Вставка нового пользователя
     await db.query(
-      'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+      'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4)',
       [username, email, hashed, role || 'cashier']
     );
 
@@ -233,15 +253,13 @@ app.post('/register', async (req, res) => {
   } catch (err) {
     console.error('❌ Ошибка при регистрации:', err);
 
-    // 💬 Обработка ошибки дубликата
-    if (err.code === 'ER_DUP_ENTRY') {
+    if (err.code === '23505') {
       return res.status(409).json({
         success: false,
         message: 'Такой пользователь уже существует'
       });
     }
 
-    // 💬 Общая ошибка
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при регистрации'
@@ -251,14 +269,14 @@ app.post('/register', async (req, res) => {
 
 app.get('/api/users', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, username, email, role FROM users');
-
-    res.json(rows);
+    const result = await db.query('SELECT id, username, email, role FROM users');
+    res.json(result.rows);
   } catch (err) {
     console.error('Ошибка при получении пользователей:', err);
     res.status(500).json({ error: 'Ошибка при получении пользователей' });
   }
 });
+
 app.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login.html');
@@ -266,46 +284,41 @@ app.get('/logout', (req, res) => {
 });
 
 
-// Получить список товаров на складе
 app.get('/api/inventory', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, name, qty, price FROM inventory');
-    res.json(rows);
+    const result = await db.query('SELECT id, name, qty, price FROM inventory');
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Ошибка при получении склада' });
   }
 });
+
 app.get('/inventory/items', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, name, quantity, price FROM inventory');
-    res.json({ success: true, items: rows });
+    const result = await db.query('SELECT id, name, quantity, price FROM inventory');
+    res.json({ success: true, items: result.rows });
   } catch (err) {
     console.error('❌ Ошибка при получении инвентаря:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
 
-
-
-
-// 🔹 Получить уведомления
 app.get('/notifications', requireRole(['admin']), async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const result = await db.query(
       `SELECT n.id, n.type, n.message, n.created_at, u.username AS author
        FROM notifications n
        LEFT JOIN users u ON n.user_id = u.id
        ORDER BY n.created_at DESC
        LIMIT 50`
     );
-    res.json({ success: true, notifications: rows });
+    res.json({ success: true, notifications: result.rows });
   } catch {
     res.status(500).json({ success: false });
   }
 });
 
-// 🔹 Обновить товар
 app.post('/inventory/update', requireRole(['admin','worker','cashier']), async (req, res) => {
   try {
     const { product_id, delta = 0, price } = req.body;
@@ -315,18 +328,18 @@ app.post('/inventory/update', requireRole(['admin','worker','cashier']), async (
 
     if (typeof price === 'number') {
       await db.query(
-        'UPDATE products SET quantity = quantity + ?, price = ? WHERE id = ?',
+        'UPDATE products SET quantity = quantity + $1, price = $2 WHERE id = $3',
         [delta, price, product_id]
       );
     } else {
       await db.query(
-        'UPDATE products SET quantity = quantity + ? WHERE id = ?',
+        'UPDATE products SET quantity = quantity + $1 WHERE id = $2',
         [delta, product_id]
       );
     }
 
     await db.query(
-      'INSERT INTO notifications (message, user_id, type) VALUES (?, ?, ?)',
+      'INSERT INTO notifications (message, user_id, type) VALUES ($1, $2, $3)',
       [
         `Пользователь ${req.session.user.username} обновил товар ID=${product_id} (изменение: ${delta}${price ? ', новая цена: ' + price : ''})`,
         req.session.user.id,
@@ -349,13 +362,13 @@ app.post('/inventory/report', requireRole(['worker']), async (req, res) => {
     let totalValue = 0;
     for (const item of items) {
       await db.query(
-        'UPDATE products SET quantity = quantity + ?, price = ? WHERE id = ?',
+        'UPDATE products SET quantity = quantity + $1, price = $2 WHERE id = $3',
         [item.qty, item.price, item.product_id]
       );
       totalValue += item.qty * item.price;
     }
     await db.query(
-      'INSERT INTO inventory_reports (worker, date, total_value) VALUES (?, CURDATE(), ?)',
+      'INSERT INTO inventory_reports (worker, date, total_value) VALUES ($1, CURRENT_DATE, $2)',
       [req.session.user.username, totalValue]
     );
     res.json({ success: true, totalValue });
@@ -374,21 +387,22 @@ app.get('/inventory/search', async (req, res) => {
     if (q.length < 1) {
       return res.json({ success: true, products: [] });
     }
-    const [rows] = await db.query(
-      "SELECT id, name, price, quantity FROM products WHERE name LIKE ? ORDER BY name LIMIT 10",
+    const result = await db.query(
+      "SELECT id, name, price, quantity FROM products WHERE name ILIKE $1 ORDER BY name LIMIT 10",
       [`%${q}%`]
     );
-    res.json({ success: true, products: rows });
+    res.json({ success: true, products: result.rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 app.post('/api/inventory/add', async (req, res) => {
   try {
     const { name, qty, price } = req.body;
 
     await db.query(
-      'INSERT INTO inventory (name, quantity, price) VALUES (?, ?, ?)',
+      'INSERT INTO inventory (name, quantity, price) VALUES ($1, $2, $3)',
       [name, qty, price]
     );
 
@@ -399,16 +413,14 @@ app.post('/api/inventory/add', async (req, res) => {
   }
 });
 
-
 app.post('/api/close-shift', async (req, res) => {
   try {
     const { cashier } = req.body;
 
-
-    const [items] = await db.query('SELECT name, quantity, price FROM inventory');
+    const result = await db.query('SELECT name, quantity, price FROM inventory');
+    const items = result.rows;
 
     console.log('📦 Полученные items:', items);
-
 
     const filename = `supply_report_${Date.now()}.pdf`;
 
@@ -426,7 +438,7 @@ app.post('/api/close-shift', async (req, res) => {
       return sum + qty * price;
     }, 0);
 
-    await db.query('INSERT INTO reports (cashier, total, file) VALUES (?, ?, ?)', [
+    await db.query('INSERT INTO reports (cashier, total, file) VALUES ($1, $2, $3)', [
       cashier,
       total,
       filename
@@ -434,19 +446,20 @@ app.post('/api/close-shift', async (req, res) => {
     res.json({ success: true, file: reportPath });
   } catch (err) {
     console.error('❌ Ошибка при формировании отчёта:', err.message, err.stack);
-
     res.status(500).json({ error: 'Ошибка при формировании отчёта' });
   }
 });
 
+
 app.post('/sales/sell', requireRole(['cashier']), async (req, res) => {
   try {
     const { product_id, qty } = req.body;
-    const [[product]] = await db.query('SELECT quantity FROM products WHERE id = ?', [product_id]);
+    const result = await db.query('SELECT quantity FROM products WHERE id = $1', [product_id]);
+    const product = result.rows[0];
     if (!product || product.quantity < qty) {
       return res.json({ success: false, message: 'Недостаточно товара' });
     }
-    await db.query('UPDATE products SET quantity = quantity - ? WHERE id = ?', [qty, product_id]);
+    await db.query('UPDATE products SET quantity = quantity - $1 WHERE id = $2', [qty, product_id]);
     res.json({ success: true, remaining: product.quantity - qty });
   } catch {
     res.status(500).json({ success: false });
@@ -470,15 +483,16 @@ app.post('/sales/receipt', requireRole(['cashier']), async (req, res) => {
         return res.status(400).json({ success: false, message: 'Некорректные данные товара' });
       }
       await db.query(
-        'UPDATE products SET quantity = quantity - ? WHERE id = ?',
+        'UPDATE products SET quantity = quantity - $1 WHERE id = $2',
         [item.qty, item.id]
       );
       total += item.qty * item.price;
     }
-    const [result] = await db.query(
-      'INSERT INTO cashier_reports (cashier_name, total, created_at) VALUES (?, ?, NOW())',
+    const result = await db.query(
+      'INSERT INTO cashier_reports (cashier_name, total, created_at) VALUES ($1, $2, NOW()) RETURNING id',
       [cashierName, total]
     );
+    const reportId = result.rows[0].id;
     const filename = `report_${cashierName}_${Date.now()}.pdf`;
     const reportsDir = path.join(__dirname, 'public', 'reports');
     if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
@@ -500,12 +514,12 @@ app.post('/sales/receipt', requireRole(['cashier']), async (req, res) => {
     doc.end();
 
     await db.query(
-      'UPDATE cashier_reports SET filename = ? WHERE id = ?',
-      [filename, result.insertId]
+      'UPDATE cashier_reports SET filename = $1 WHERE id = $2',
+      [filename, reportId]
     );
 
     await db.query(
-      'INSERT INTO notifications (type, message, user_id) VALUES (?, ?, ?)',
+      'INSERT INTO notifications (type, message, user_id) VALUES ($1, $2, $3)',
       [
         'cashier_report',
         `Кассир ${cashierName} пробил чек на сумму ${total.toFixed(2)}`,
@@ -526,39 +540,37 @@ app.post('/sales/receipt', requireRole(['cashier']), async (req, res) => {
 
 app.get('/notifications', requireRole(['admin']), async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const result = await db.query(
       `SELECT n.id, n.type, n.message, n.created_at, u.username AS author
        FROM notifications n
        LEFT JOIN users u ON n.user_id = u.id
        ORDER BY n.created_at DESC
        LIMIT 50`
     );
-    res.json({ success: true, notifications: rows });
+    res.json({ success: true, notifications: result.rows });
   } catch {
     res.status(500).json({ success: false });
   }
 });
-
 app.post('/reports/close-shift', closeDayHandler);
 app.post('/reports/close-day', closeDayHandler);
 
 async function closeDayHandler(req, res) {
   try {
-    const [rows] = await db.query(`
+    const result = await db.query(`
       SELECT SUM(total) as total, COUNT(*) as count 
       FROM cashier_reports 
-      WHERE DATE(created_at) = CURDATE()
+      WHERE DATE(created_at) = CURRENT_DATE
     `);
 
-    const total = rows[0].total || 0;
-    const count = rows[0].count || 0;
+    const total = result.rows[0].total || 0;
+    const count = result.rows[0].count || 0;
 
-    // имя файла и путь
     const filename = `day_report_${Date.now()}.pdf`;
     const fileUrl = generateReport(filename, req.session.user.username, [], total);
 
     await db.query(
-      'INSERT INTO notifications (message, user_id, url, type) VALUES (?, ?, ?, ?)',
+      'INSERT INTO notifications (message, user_id, url, type) VALUES ($1, $2, $3, $4)',
       [
         `Кассир закрыл рабочий день. Чеков: ${count}, сумма: ${total}`,
         req.session.user.id,
@@ -573,22 +585,23 @@ async function closeDayHandler(req, res) {
   }
 }
 
-
 app.get('/reports/daily', requireRole(['cashier']), async (req, res) => {
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM sales_reports WHERE cashier = ? ORDER BY date DESC',
+    const result = await db.query(
+      'SELECT * FROM sales_reports WHERE cashier = $1 ORDER BY date DESC',
       [req.session.user.username]
     );
-    res.json({ success: true, reports: rows });
+    res.json({ success: true, reports: result.rows });
   } catch {
     res.status(500).json({ success: false });
   }
 });
 
+
+
 app.get('/admin/users', requireRole(['admin']), async (req, res) => {
-  const [rows] = await db.query('SELECT id, username, email, role FROM users ORDER BY id DESC');
-  res.json({ success: true, users: rows });
+  const result = await db.query('SELECT id, username, email, role FROM users ORDER BY id DESC');
+  res.json({ success: true, users: result.rows });
 });
 
 app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
@@ -599,30 +612,9 @@ app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Не передан ID пользователя' });
     }
 
-    const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
+    const result = await db.query('DELETE FROM users WHERE id = $1', [userId]);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: 'Пользователь не найден' });
-    }
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('❌ Ошибка при удалении пользователя:', err);
-    res.status(500).json({ success: false, message: 'Ошибка сервера при удалении' });
-  }
-});
-
-app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ success: false, message: 'Не передан ID пользователя' });
-    }
-
-    const [result] = await db.query('DELETE FROM users WHERE id = ?', [userId]);
-
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ success: false, message: 'Пользователь не найден' });
     }
 
@@ -635,23 +627,28 @@ app.post('/admin/users/delete', requireRole(['admin']), async (req, res) => {
 
 app.get('/dashboard/stats', async (req, res) => {
   try {
-    const [[p]] = await db.query('SELECT COUNT(*) AS products FROM products');
-    const [[s]] = await db.query('SELECT COUNT(*) AS sales FROM sales_reports');
-    const [[r]] = await db.query('SELECT COUNT(*) AS reports FROM inventory_reports');
-    res.json({ success: true, products: p.products, sales: s.sales, reports: r.reports });
+    const resultP = await db.query('SELECT COUNT(*) AS products FROM products');
+    const resultS = await db.query('SELECT COUNT(*) AS sales FROM sales_reports');
+    const resultR = await db.query('SELECT COUNT(*) AS reports FROM inventory_reports');
+    res.json({
+      success: true,
+      products: resultP.rows[0].products,
+      sales: resultS.rows[0].sales,
+      reports: resultR.rows[0].reports
+    });
   } catch {
     res.status(500).json({ success: false });
   }
 });
 
 app.get('/reports/sales', requireRole(['admin']), async (req, res) => {
-  const [rows] = await db.query('SELECT * FROM sales_reports ORDER BY date DESC');
-  res.json(rows);
+  const result = await db.query('SELECT * FROM sales_reports ORDER BY date DESC');
+  res.json(result.rows);
 });
 
 app.get('/reports/inventory', requireRole(['admin']), async (req, res) => {
-  const [rows] = await db.query('SELECT * FROM inventory_reports ORDER BY date DESC');
-  res.json(rows);
+  const result = await db.query('SELECT * FROM inventory_reports ORDER BY date DESC');
+  res.json(result.rows);
 });
 
 app.get('/reports/list', requireRole(['admin']), async (req, res) => {
@@ -659,12 +656,12 @@ app.get('/reports/list', requireRole(['admin']), async (req, res) => {
   let sql = 'SELECT id, cashier_name AS cashier, total, filename, created_at FROM cashier_reports';
   const params = [];
   if (date) {
-    sql += ' WHERE DATE(created_at) = ?';
+    sql += ' WHERE DATE(created_at) = $1';
     params.push(date);
   }
   sql += ' ORDER BY created_at DESC';
-  const [rows] = await db.query(sql, params);
-  const reports = rows.map(r => ({
+  const result = await db.query(sql, params);
+  const reports = result.rows.map(r => ({
     date: r.created_at?.toISOString ? r.created_at.toISOString().slice(0, 10) : r.created_at,
     cashier: r.cashier,
     total: Number(r.total || 0),
@@ -676,6 +673,88 @@ app.get('/reports/list', requireRole(['admin']), async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
+app.get('/init-db', async (req, res) => {
+  try {
+    await db.query(`
+      console.log('📡 /init-db маршрут вызван');
+
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        role VARCHAR(20) DEFAULT 'cashier'
+      );
+
+      CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        quantity INTEGER DEFAULT 0,
+        price NUMERIC(10,2) DEFAULT 0.00
+      );
+
+      CREATE TABLE IF NOT EXISTS inventory (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        quantity INTEGER DEFAULT 0,
+        price NUMERIC(10,2) DEFAULT 0.00
+      );
+
+      CREATE TABLE IF NOT EXISTS inventory_reports (
+        id SERIAL PRIMARY KEY,
+        worker VARCHAR(50),
+        date DATE DEFAULT CURRENT_DATE,
+        total_value NUMERIC(10,2)
+      );
+
+      CREATE TABLE IF NOT EXISTS cashier_reports (
+        id SERIAL PRIMARY KEY,
+        cashier_name VARCHAR(50),
+        total NUMERIC(10,2),
+        filename TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS sales_reports (
+        id SERIAL PRIMARY KEY,
+        cashier VARCHAR(50),
+        date DATE DEFAULT CURRENT_DATE,
+        total NUMERIC(10,2)
+      );
+
+      CREATE TABLE IF NOT EXISTS sales (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER REFERENCES products(id),
+        qty INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS notifications (
+        id SERIAL PRIMARY KEY,
+        type VARCHAR(50),
+        message TEXT,
+        user_id INTEGER REFERENCES users(id),
+        url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS reports (
+        id SERIAL PRIMARY KEY,
+        cashier VARCHAR(50),
+        total NUMERIC(10,2),
+        file TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    res.send('✅ Все таблицы созданы');
+  } catch (err) {
+    console.error('❌ Ошибка при создании таблиц:', err);
+    res.status(500).send('Ошибка');
+  }
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
