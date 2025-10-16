@@ -13,13 +13,20 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
+
+const sessionStore = new pgSession({ pool });
+
+sessionStore.createTableIfMissing()
+  .then(() => console.log('✅ Таблица session создана или уже существует'))
+  .catch(err => console.error('❌ Ошибка при создании таблицы session:', err));
+
 app.use(session({
-  store: new pgSession({ pool }),
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000 
+    maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }));
 
