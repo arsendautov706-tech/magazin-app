@@ -152,6 +152,9 @@ app.get('/cashier', (req, res) => {
   }
   res.sendFile(path.join(__dirname, 'public', 'cashier.html'));
 });
+const inventoryRouter = require('./routes/inventory');
+app.use('/inventory', inventoryRouter);
+
 
 app.post('/login', async (req, res) => {
   try {
