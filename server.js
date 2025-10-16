@@ -16,10 +16,6 @@ const pool = new Pool({
 
 const sessionStore = new pgSession({ pool });
 
-sessionStore.createTableIfMissing()
-  .then(() => console.log('✅ Таблица session создана или уже существует'))
-  .catch(err => console.error('❌ Ошибка при создании таблицы session:', err));
-
 app.use(session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET || 'supersecret',
@@ -29,7 +25,6 @@ app.use(session({
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }));
-
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
