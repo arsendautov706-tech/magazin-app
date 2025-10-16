@@ -90,4 +90,9 @@ async function init() {
   }
 }
 
+module.exports = async function initDatabase(pool) {
+  await pool.query(`CREATE TABLE IF NOT EXISTS ...`);
+};
+
+
 init();

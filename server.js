@@ -670,10 +670,9 @@ app.get('/reports/list', requireRole(['admin']), async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
-const { Pool } = require('pg');
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
+const initDatabase = require('./init-db');
+initDatabase(pool);
+
 
 app.get('/init-db', async (req, res) => {
   console.log('📡 /init-db маршрут вызван');
