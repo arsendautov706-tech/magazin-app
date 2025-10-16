@@ -712,6 +712,8 @@ app.get('/init-db', async (req, res) => {
     res.status(500).send('Ошибка');
   }
 });
+const db = require('./init-db');
+
 
 
 
