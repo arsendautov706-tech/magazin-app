@@ -670,15 +670,43 @@ app.get('/reports/list', requireRole(['admin']), async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
+const { Pool } = require('pg');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
 app.get('/init-db', async (req, res) => {
   console.log('📡 /init-db маршрут вызван');
   try {
-    await db.query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
-        ...
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(100) NOT NULL,
+        role VARCHAR(50) DEFAULT 'user'
       );
-      ...
+
+      CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        price NUMERIC(10, 2) NOT NULL,
+        quantity INTEGER DEFAULT 0
+      );
+
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS order_items (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER REFERENCES orders(id),
+        product_id INTEGER REFERENCES products(id),
+        quantity INTEGER NOT NULL
+      );
     `);
+
     res.send('✅ Все таблицы созданы');
   } catch (err) {
     console.error('❌ Ошибка при создании таблиц:', err);
