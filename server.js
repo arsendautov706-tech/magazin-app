@@ -11,9 +11,6 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 
-then(() => console.log('✅ PostgreSQL подключен'))
-  .catch(err => console.error('❌ Ошибка PostgreSQL:', err));
-
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
   fs.mkdirSync(reportsDir);
@@ -21,6 +18,7 @@ if (!fs.existsSync(reportsDir)) {
 } else {
   console.log('📁 Папка reports уже существует');
 }
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -29,6 +27,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
 
 app.use('/reports', express.static(reportsDir));
 app.use(express.static(path.join(__dirname, 'public')));
