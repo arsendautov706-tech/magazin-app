@@ -1,12 +1,15 @@
-const { Pool } = require('pg');
-require('dotenv').config();
-
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-module.exports = db;
-
+module.exports = async function initDatabase(pool) {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (...);
+      CREATE TABLE IF NOT EXISTS products (...);
+      ...
+    `);
+    console.log('✅ Все таблицы созданы');
+  } catch (err) {
+    console.error('❌ Ошибка при создании таблиц:', err);
+  }
+};
 
 
 async function init() {

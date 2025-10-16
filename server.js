@@ -4,12 +4,13 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const { Pool } = require('pg');
-
-const app = express();
+require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
+
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
@@ -712,7 +713,9 @@ app.get('/init-db', async (req, res) => {
     res.status(500).send('Ошибка');
   }
 });
-const db = require('./init-db');
+const initDatabase = require('./init-db');
+initDatabase(pool);
+
 
 
 
