@@ -11,8 +11,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 
-db.connect()
-  .then(() => console.log('✅ PostgreSQL подключен'))
+then(() => console.log('✅ PostgreSQL подключен'))
   .catch(err => console.error('❌ Ошибка PostgreSQL:', err));
 
 const reportsDir = path.join(__dirname, 'reports');
