@@ -4,13 +4,13 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const { Pool } = require('pg');
-require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
+const app = express(); 
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
@@ -28,6 +28,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
 
 
 app.use('/reports', express.static(reportsDir));
