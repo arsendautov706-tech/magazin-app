@@ -1,20 +1,6 @@
 module.exports = async function initDatabase(pool) {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (...);
-      CREATE TABLE IF NOT EXISTS products (...);
-      ...
-    `);
-    console.log('✅ Все таблицы созданы');
-  } catch (err) {
-    console.error('❌ Ошибка при создании таблиц:', err);
-  }
-};
-
-
-async function init() {
-  try {
-    await db.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) NOT NULL UNIQUE,
@@ -85,16 +71,7 @@ async function init() {
     `);
 
     console.log('✅ Все таблицы созданы');
-    process.exit(0);
   } catch (err) {
     console.error('❌ Ошибка при создании таблиц:', err);
-    process.exit(1);
   }
-}
-
-module.exports = async function initDatabase(pool) {
-  await pool.query(`CREATE TABLE IF NOT EXISTS ...`);
 };
-
-
-init();
