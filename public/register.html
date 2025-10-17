@@ -3,11 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <title>Регистрация</title>
+  <!-- Подключаем общий стиль -->
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>📝 Регистрация</h2>
+  <header class="navbar">
+    <div class="logo">Magazin ERP</div>
+    <nav>
+      <ul>
+        <li><a href="/">Главная</a></li>
+        <li><a href="/login.html">Войти</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Регистрация</h1>
+    <p>Создайте аккаунт и начните работу в системе</p>
+  </section>
+
+  <div class="container" style="max-width:400px; margin:40px auto;">
     <form id="registerForm">
       <input type="text" id="username" placeholder="Имя пользователя" required>
       <input type="email" id="email" placeholder="Email" required>
@@ -17,7 +32,7 @@
         <option value="cashier">Кассир</option>
         <option value="admin">Админ</option>
       </select>
-      <button type="submit">Зарегистрироваться</button>
+      <button type="submit" class="btn-primary">Зарегистрироваться</button>
     </form>
     <div id="result" style="margin-top:20px;"></div>
   </div>
@@ -43,6 +58,7 @@
 
         const data = await res.json();
         if (data.success) {
+          // сразу логиним
           const loginRes = await fetch('/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -51,19 +67,19 @@
           const loginData = await loginRes.json();
 
           if (loginData.success && loginData.user?.role) {
-            const role = loginData.user.role;
-            if (role === 'admin') window.location.href = '/admin.html';
-            else if (role === 'cashier') window.location.href = '/cashier.html';
-            else if (role === 'worker') window.location.href = '/worker.html';
+            const userRole = loginData.user.role;
+            if (userRole === 'admin') window.location.href = '/admin.html';
+            else if (userRole === 'cashier') window.location.href = '/cashier.html';
+            else if (userRole === 'worker') window.location.href = '/worker.html';
             else window.location.href = '/';
           } else {
-            alert('Регистрация прошла, но вход не удался');
+            document.getElementById('result').innerText = 'Регистрация прошла, но вход не удался';
           }
         } else {
-          alert('❌ Ошибка: ' + (data.message || 'Не удалось зарегистрировать'));
+          document.getElementById('result').innerText = '❌ Ошибка: ' + (data.message || 'Не удалось зарегистрировать');
         }
       } catch (err) {
-        alert('Ошибка сети: ' + err.message);
+        document.getElementById('result').innerText = 'Ошибка сети: ' + err.message;
       }
     });
   </script>

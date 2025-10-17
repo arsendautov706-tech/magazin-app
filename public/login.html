@@ -1,20 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
   <title>Вход</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>Вход</h2>
+  <header class="navbar">
+    <div class="logo">Magazin ERP</div>
+    <nav>
+      <ul>
+        <li><a href="/">Главная</a></li>
+        <li><a href="/register.html">Регистрация</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Вход в систему</h1>
+    <p>Введите свои данные для авторизации</p>
+  </section>
+
+  <div class="container" style="max-width:400px; margin:40px auto;">
     <form id="loginForm">
-      <input id="username" name="username" placeholder="Логин или Email" required>
-      <input id="password" type="password" name="password" placeholder="Пароль" required>
-      <button type="submit">Войти</button>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Пароль" required>
+      <button type="submit" class="btn-primary">Войти</button>
     </form>
-    <div id="msg"></div>
+    <div id="result" style="margin-top:20px;"></div>
   </div>
-  <script src="/js/login.js"></script>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        return alert('Заполните все поля');
+      }
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (data.success && data.user?.role) {
+          const role = data.user.role;
+          if (role === 'admin') window.location.href = '/admin.html';
+          else if (role === 'cashier') window.location.href = '/cashier.html';
+          else if (role === 'worker') window.location.href = '/worker.html';
+          else window.location.href = '/';
+        } else {
+          document.getElementById('result').innerText = '❌ Неверный email или пароль';
+        }
+      } catch (err) {
+        document.getElementById('result').innerText = 'Ошибка сети: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
