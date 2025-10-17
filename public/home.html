@@ -1,29 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Главный экран</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERP для бизнеса</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <script src="/js/home.js"></script>
 </head>
-<body class="home-theme">
-  <div class="container" style="text-align:center; margin-top:50px">
-    <h1>🚀 Добро пожаловать!</h1>
-    <p>Выберите вашу роль и начните работу:</p>
+<body>
+  <!-- Навигация -->
+  <header class="navbar">
+    <div class="logo">Magazin ERP</div>
+    <nav>
+      <ul>
+        <li><a href="#solutions">Решения</a></li>
+        <li><a href="#features">Возможности</a></li>
+        <li><a href="#roles">Роли</a></li>
+        <li><a href="#support">Поддержка</a></li>
+      </ul>
+    </nav>
+    <a href="/register.html" class="btn-primary">Начать бесплатно</a>
+  </header>
 
-    <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px; max-width:250px; margin-inline:auto">
-    <button onclick="goToPanel('admin')">🛠️ Админ</button>
-<button onclick="goToPanel('cashier')">🧾 Кассир</button>
-<button onclick="goToPanel('worker')">📦 Работник склада</button>
+  <!-- Hero блок -->
+  <section class="hero">
+    <h1>Облачная ERP для вашего бизнеса</h1>
+    <p>Все, что нужно, в одной системе: продажи, закупки, учет, финансы, клиенты и поставщики</p>
+    <a href="/register.html" class="btn-primary">Попробовать сейчас</a>
+  </section>
 
+  <!-- Роли -->
+  <section id="roles" class="roles">
+    <h2>Выберите вашу роль</h2>
+    <div class="role-buttons">
+      <button onclick="goToPanel('admin')">🛠️ Админ</button>
+      <button onclick="goToPanel('cashier')">🧾 Кассир</button>
+      <button onclick="goToPanel('worker')">📦 Склад</button>
     </div>
+  </section>
 
-    <p style="margin-top:30px">
-      <a href="/login.html">Войти</a> или 
-      <a href="/register.html">Зарегистрироваться</a>
-      <script src="/js/home.js"></script>
-    </p>
-  </div>
+  <!-- Возможности -->
+  <section id="features" class="features">
+    <h2>Все возможности управления торговлей</h2>
+    <ul>
+      <li>📦 Управление товарами и остатками</li>
+      <li>🧾 Онлайн-касса и чеки</li>
+      <li>📊 Отчёты и аналитика</li>
+      <li>👥 CRM и клиенты</li>
+      <li>🔗 Интеграции с маркетплейсами</li>
+    </ul>
+  </section>
+
+  <!-- Призыв -->
+  <section class="cta">
+    <h2>Попробуйте Magazin ERP прямо сейчас</h2>
+    <a href="/register.html" class="btn-primary">Начать бесплатно</a>
+  </section>
+
+  <!-- Футер -->
+  <footer>
+    <p>© 2025 Magazin ERP. Все права защищены.</p>
+  </footer>
 </body>
 </html>
