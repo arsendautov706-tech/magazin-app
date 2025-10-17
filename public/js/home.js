@@ -147,3 +147,23 @@ async function goToPanel(targetRole) {
     alert('Ошибка сети');
   }
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const cards = document.querySelectorAll(".benefit-card");
+  const infoBox = document.getElementById("benefit-info");
+
+  const infoData = {
+    retail: "Розничная торговля: удобный учёт товаров, касса, чеки, интеграция с 54‑ФЗ и маркировкой.",
+    wholesale: "Оптовая торговля: управление заказами, накладные, счета, контроль остатков и цен.",
+    online: "Онлайн‑торговля: интеграция с маркетплейсами (Ozon, WB, Яндекс), учёт комиссий, FBO/FBS.",
+    manufacturing: "Производство: планирование, контроль сырья, себестоимость, отчёты по выпуску."
+  };
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const key = card.dataset.info;
+      infoBox.innerHTML = `<h3>${card.querySelector("h3").innerText}</h3><p>${infoData[key]}</p>`;
+      infoBox.style.display = "block";
+      infoBox.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+});
