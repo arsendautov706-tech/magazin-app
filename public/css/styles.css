@@ -179,3 +179,29 @@ body {
   display: none;
   text-align: left;
 }
+html {
+  scroll-behavior: smooth;
+}
+html {
+  scroll-behavior: smooth;
+}
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Дополнительно для карточек */
+.benefit-card, .adv-card, .review-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.benefit-card:hover, .adv-card:hover, .review-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+

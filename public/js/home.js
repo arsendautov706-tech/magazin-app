@@ -22,42 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const infoBox = document.getElementById("benefit-info");
 
   const infoData = {
-    retail: `
-      <h3>Розничная торговля</h3>
-      <ul>
-        <li>Кассовая программа с поддержкой 54‑ФЗ</li>
-        <li>Учёт товаров и остатков</li>
-        <li>CRM для клиентов</li>
-        <li>Финансовый учёт</li>
-      </ul>
-    `,
-    wholesale: `
-      <h3>Оптовая торговля</h3>
-      <ul>
-        <li>Закупки и продажи</li>
-        <li>Складской учёт</li>
-        <li>Контроль финансов</li>
-        <li>Планирование и аналитика</li>
-      </ul>
-    `,
-    online: `
-      <h3>Онлайн‑торговля</h3>
-      <ul>
-        <li>Интеграция с Ozon, WB, Яндекс.Маркет</li>
-        <li>Автоматизация заказов</li>
-        <li>Управление доставкой</li>
-        <li>CRM для онлайн‑клиентов</li>
-      </ul>
-    `,
-    manufacturing: `
-      <h3>Производство</h3>
-      <ul>
-        <li>Планирование производства</li>
-        <li>Учёт сырья и материалов</li>
-        <li>Расчёт себестоимости</li>
-        <li>Контроль выполнения заказов</li>
-      </ul>
-    `
+    retail: `<h3>Розничная торговля</h3><ul><li>Кассовая программа</li><li>Учёт товаров</li><li>CRM</li><li>Финансовый учёт</li></ul>`,
+    wholesale: `<h3>Оптовая торговля</h3><ul><li>Закупки и продажи</li><li>Складской учёт</li><li>Финансы</li><li>Планирование</li></ul>`,
+    online: `<h3>Онлайн‑торговля</h3><ul><li>Ozon, WB, Яндекс.Маркет</li><li>Автоматизация заказов</li><li>CRM</li></ul>`,
+    manufacturing: `<h3>Производство</h3><ul><li>Планирование</li><li>Учёт сырья</li><li>Себестоимость</li><li>Контроль заказов</li></ul>`
   };
 
   cards.forEach(card => {
@@ -68,6 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
       infoBox.scrollIntoView({ behavior: "smooth" });
     });
   });
+
+  // Fade-in при скролле
+  const faders = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.2 });
+
+  faders.forEach(el => observer.observe(el));
+
+  // Автоматический год в футере
+  const footerText = document.getElementById("footer-text");
+  if (footerText) {
+    const year = new Date().getFullYear();
+    footerText.textContent = `© ${year} Magazin ERP. Все права защищены.`;
+  }
 });
 
 // Функция перехода в панель
@@ -83,9 +70,16 @@ async function goToPanel(targetRole) {
     }
 
     if (role === 'admin') window.location.href = '/admin.html';
-    else if (role === 'cashier') window.location.href = '/cashier.html';
-    else if (role === 'worker') window.location.href = '/worker.html';
-  } catch (err) {
-    console.error(err);
-  }
-}
+    else if (role === 'cashier') window.location.href =
+const faders = document.querySelectorAll('.fade-in, .benefit-card, .adv-card, .review-card');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, index) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, index * 150); // задержка 150мс между элементами
+    }
+  });
+}, { threshold: 0.2 });
+
+faders.forEach(el => observer.observe(el));
