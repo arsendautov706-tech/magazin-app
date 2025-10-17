@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     manufacturing: `<h3>Производство</h3><ul><li>Планирование</li><li>Учёт сырья</li><li>Себестоимость</li><li>Контроль заказов</li></ul>`
   };
 
-  cards.forEach(card => {
+  cards.forEach((card, index) => {
     card.addEventListener("click", () => {
       const key = card.dataset.info;
       infoBox.innerHTML = infoData[key];
@@ -37,12 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Fade-in при скролле
-  const faders = document.querySelectorAll('.fade-in');
+  // Fade-in при скролле с задержкой
+  const faders = document.querySelectorAll('.fade-in, .benefit-card, .adv-card, .review-card');
   const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
+    entries.forEach((entry, index) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, index * 150);
       }
     });
   }, { threshold: 0.2 });
@@ -70,16 +72,9 @@ async function goToPanel(targetRole) {
     }
 
     if (role === 'admin') window.location.href = '/admin.html';
-    else if (role === 'cashier') window.location.href =
-const faders = document.querySelectorAll('.fade-in, .benefit-card, .adv-card, .review-card');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach((entry, index) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => {
-        entry.target.classList.add('visible');
-      }, index * 150); // задержка 150мс между элементами
-    }
-  });
-}, { threshold: 0.2 });
-
-faders.forEach(el => observer.observe(el));
+    else if (role === 'cashier') window.location.href = '/cashier.html';
+    else if (role === 'worker') window.location.href = '/worker.html';
+  } catch (err) {
+    console.error(err);
+  }
+}
