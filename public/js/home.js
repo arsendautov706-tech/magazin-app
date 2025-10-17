@@ -18,12 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const panelBtn = document.createElement('button');
       panelBtn.innerText = 'Перейти в панель';
       panelBtn.style.marginTop = '10px';
-      panelBtn.onclick = () => {
-        if (role === 'admin') window.location.href = '/admin.html';
-        else if (role === 'cashier') window.location.href = '/cashier.html';
-        else if (role === 'worker') window.location.href = '/worker.html';
-        else window.location.href = '/';
-      };
+      panelBtn.addEventListener('click', () => {
+        goToPanel(role);
+      });
       document.querySelector('.container')?.appendChild(panelBtn);
     } else {
       console.log('👤 Гость: остаётся на home.html');
@@ -32,9 +29,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Ошибка проверки сессии:', err);
   }
 
-  // Твои функции — не трогаем
+  // Подгружаем инвентарь
   loadInventory();
+
+  // Навешиваем обработчики на кнопки ролей
+  const btnAdmin = document.getElementById("btn-admin");
+  const btnCashier = document.getElementById("btn-cashier");
+  const btnWorker = document.getElementById("btn-worker");
+
+  if (btnAdmin) btnAdmin.addEventListener("click", () => goToPanel("admin"));
+  if (btnCashier) btnCashier.addEventListener("click", () => goToPanel("cashier"));
+  if (btnWorker) btnWorker.addEventListener("click", () => goToPanel("worker"));
 });
+
+// ===== Функции =====
 
 function logout() {
   window.location.href = '/logout';
@@ -42,43 +50,65 @@ function logout() {
 
 function toggleInventory() {
   const box = document.getElementById('inventoryBox');
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  if (box) {
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 async function loadInventory() {
-  const res = await fetch('/inventory/items');
-  const data = await res.json();
-  if (data.success) {
-    const tbody = document.querySelector('#inventoryTable tbody');
-    if (tbody) {
-      tbody.innerHTML = '';
-      data.items.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${item.name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.sku}</td>`;
-        tbody.appendChild(row);
-      });
+  try {
+    const res = await fetch('/inventory/items');
+    const data = await res.json();
+    if (data.success) {
+      const tbody = document.querySelector('#inventoryTable tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        data.items.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.price}</td>
+            <td>${item.sku}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
     }
+  } catch (err) {
+    console.error('Ошибка загрузки инвентаря:', err);
   }
 }
 
 async function loadUsers() {
-  const res = await fetch('/admin/users');
-  const data = await res.json();
-  if (data.success) {
-    const tbody = document.querySelector('#userTable tbody');
-    if (tbody) {
-      tbody.innerHTML = '';
-      data.users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${user.username}</td>
-          <td>${user.email}</td>
-          <td>${user.role}</td>
-          <td><button onclick="deleteUser(${user.id})">❌</button></td>
-        `;
-        tbody.appendChild(row);
-      });
+  try {
+    const res = await fetch('/admin/users');
+    const data = await res.json();
+    if (data.success) {
+      const tbody = document.querySelector('#userTable tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        data.users.forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${user.username}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td><button class="delete-btn" data-id="${user.id}">❌</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        // навешиваем события на кнопки удаления
+        tbody.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            deleteUser(btn.dataset.id);
+          });
+        });
+      }
     }
+  } catch (err) {
+    console.error('Ошибка загрузки пользователей:', err);
   }
 }
 
@@ -91,6 +121,7 @@ async function deleteUser(id) {
   });
   loadUsers();
 }
+
 async function goToPanel(targetRole) {
   try {
     const res = await fetch('/session');
