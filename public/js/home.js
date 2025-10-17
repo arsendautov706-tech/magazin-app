@@ -1,38 +1,14 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const res = await fetch('/session');
-    const data = await res.json();
+document.addEventListener('DOMContentLoaded', () => {
+  // Проверка сессии
+  fetch('/session')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Пользователь:", data.user.username, "роль:", data.user.role);
+      }
+    });
 
-    if (data.success) {
-      const { username, role } = data.user;
-
-      // Приветствие
-      const welcome = document.createElement('div');
-      welcome.innerHTML = `👋 Добро пожаловать, <b>${username}</b>!`;
-      welcome.style.marginBottom = '20px';
-      welcome.style.fontSize = '18px';
-      welcome.style.textAlign = 'center';
-      document.querySelector('.container')?.prepend(welcome);
-
-      // Кнопка перехода в панель
-      const panelBtn = document.createElement('button');
-      panelBtn.innerText = 'Перейти в панель';
-      panelBtn.style.marginTop = '10px';
-      panelBtn.addEventListener('click', () => {
-        goToPanel(role);
-      });
-      document.querySelector('.container')?.appendChild(panelBtn);
-    } else {
-      console.log('👤 Гость: остаётся на home.html');
-    }
-  } catch (err) {
-    console.error('Ошибка проверки сессии:', err);
-  }
-
-  // Подгружаем инвентарь
-  loadInventory();
-
-  // Навешиваем обработчики на кнопки ролей
+  // Роли
   const btnAdmin = document.getElementById("btn-admin");
   const btnCashier = document.getElementById("btn-cashier");
   const btnWorker = document.getElementById("btn-worker");
@@ -40,130 +16,76 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnAdmin) btnAdmin.addEventListener("click", () => goToPanel("admin"));
   if (btnCashier) btnCashier.addEventListener("click", () => goToPanel("cashier"));
   if (btnWorker) btnWorker.addEventListener("click", () => goToPanel("worker"));
-});
 
-// ===== Функции =====
-
-function logout() {
-  window.location.href = '/logout';
-}
-
-function toggleInventory() {
-  const box = document.getElementById('inventoryBox');
-  if (box) {
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  }
-}
-
-async function loadInventory() {
-  try {
-    const res = await fetch('/inventory/items');
-    const data = await res.json();
-    if (data.success) {
-      const tbody = document.querySelector('#inventoryTable tbody');
-      if (tbody) {
-        tbody.innerHTML = '';
-        data.items.forEach(item => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>${item.price}</td>
-            <td>${item.sku}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Ошибка загрузки инвентаря:', err);
-  }
-}
-
-async function loadUsers() {
-  try {
-    const res = await fetch('/admin/users');
-    const data = await res.json();
-    if (data.success) {
-      const tbody = document.querySelector('#userTable tbody');
-      if (tbody) {
-        tbody.innerHTML = '';
-        data.users.forEach(user => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${user.username}</td>
-            <td>${user.email}</td>
-            <td>${user.role}</td>
-            <td><button class="delete-btn" data-id="${user.id}">❌</button></td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        // навешиваем события на кнопки удаления
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            deleteUser(btn.dataset.id);
-          });
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Ошибка загрузки пользователей:', err);
-  }
-}
-
-async function deleteUser(id) {
-  if (!confirm('Удалить пользователя?')) return;
-  await fetch('/admin/users/delete', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: id })
-  });
-  loadUsers();
-}
-
-async function goToPanel(targetRole) {
-  try {
-    const res = await fetch('/session');
-    const data = await res.json();
-
-    if (!data.success) {
-      alert('Сначала войдите в систему');
-      return window.location.href = '/login.html';
-    }
-
-    const { role } = data.user;
-    if (role !== targetRole) {
-      alert(`⛔ У вас нет доступа к роли "${targetRole}"`);
-      return;
-    }
-
-    // Всё ок — переходим
-    if (role === 'admin') window.location.href = '/admin.html';
-    else if (role === 'cashier') window.location.href = '/cashier.html';
-    else if (role === 'worker') window.location.href = '/worker.html';
-  } catch (err) {
-    console.error('Ошибка перехода:', err);
-    alert('Ошибка сети');
-  }
-}
-document.addEventListener("DOMContentLoaded", () => {
+  // Кому выгодно
   const cards = document.querySelectorAll(".benefit-card");
   const infoBox = document.getElementById("benefit-info");
 
   const infoData = {
-    retail: "Розничная торговля: удобный учёт товаров, касса, чеки, интеграция с 54‑ФЗ и маркировкой.",
-    wholesale: "Оптовая торговля: управление заказами, накладные, счета, контроль остатков и цен.",
-    online: "Онлайн‑торговля: интеграция с маркетплейсами (Ozon, WB, Яндекс), учёт комиссий, FBO/FBS.",
-    manufacturing: "Производство: планирование, контроль сырья, себестоимость, отчёты по выпуску."
+    retail: `
+      <h3>Розничная торговля</h3>
+      <ul>
+        <li>Кассовая программа с поддержкой 54‑ФЗ</li>
+        <li>Учёт товаров и остатков</li>
+        <li>CRM для клиентов</li>
+        <li>Финансовый учёт</li>
+      </ul>
+    `,
+    wholesale: `
+      <h3>Оптовая торговля</h3>
+      <ul>
+        <li>Закупки и продажи</li>
+        <li>Складской учёт</li>
+        <li>Контроль финансов</li>
+        <li>Планирование и аналитика</li>
+      </ul>
+    `,
+    online: `
+      <h3>Онлайн‑торговля</h3>
+      <ul>
+        <li>Интеграция с Ozon, WB, Яндекс.Маркет</li>
+        <li>Автоматизация заказов</li>
+        <li>Управление доставкой</li>
+        <li>CRM для онлайн‑клиентов</li>
+      </ul>
+    `,
+    manufacturing: `
+      <h3>Производство</h3>
+      <ul>
+        <li>Планирование производства</li>
+        <li>Учёт сырья и материалов</li>
+        <li>Расчёт себестоимости</li>
+        <li>Контроль выполнения заказов</li>
+      </ul>
+    `
   };
 
   cards.forEach(card => {
     card.addEventListener("click", () => {
       const key = card.dataset.info;
-      infoBox.innerHTML = `<h3>${card.querySelector("h3").innerText}</h3><p>${infoData[key]}</p>`;
+      infoBox.innerHTML = infoData[key];
       infoBox.style.display = "block";
       infoBox.scrollIntoView({ behavior: "smooth" });
     });
   });
 });
+
+// Функция перехода в панель
+async function goToPanel(targetRole) {
+  try {
+    const res = await fetch('/session');
+    const data = await res.json();
+    if (!data.success) return window.location.href = '/login.html';
+
+    const { role } = data.user;
+    if (role !== targetRole) {
+      return alert(`⛔ У вас нет доступа к роли "${targetRole}"`);
+    }
+
+    if (role === 'admin') window.location.href = '/admin.html';
+    else if (role === 'cashier') window.location.href = '/cashier.html';
+    else if (role === 'worker') window.location.href = '/worker.html';
+  } catch (err) {
+    console.error(err);
+  }
+}
