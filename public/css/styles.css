@@ -204,4 +204,53 @@ html {
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+}
+
+.topbar .brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: #00f2fe;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+}
+
+.burger {
+  display: none;
+  font-size: 26px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+  nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: rgba(0,0,0,0.9);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  nav.active {
+    display: flex;
+  }
+  .burger {
+    display: block;
+  }
+}
 

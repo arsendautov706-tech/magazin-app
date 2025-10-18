@@ -1,35 +1,62 @@
 let cart = [];
+let shiftOpen = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const res = await fetch('/session');
   const data = await res.json();
   if (!data.success || data.user.role !== 'cashier') {
-    return window.location.href = '/login.html';
+    return (window.location.href = '/login.html');
   }
+
+  // Бургер-меню
+  const burgerBtn = document.getElementById('burgerBtn');
+  const nav = document.getElementById('mainNav');
+  burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
+
+  // Вкладки
+  document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Слушатели
   document.getElementById('searchBox').addEventListener('input', liveSearch);
+  document.getElementById('barcodeBox').addEventListener('input', liveSearch);
+  document.getElementById('categoryFilter').addEventListener('change', liveSearch);
+
   document.getElementById('printReceipt').addEventListener('click', submitReceipt);
+  document.getElementById('openShift').addEventListener('click', openShift);
   document.getElementById('closeShift').addEventListener('click', closeShift);
 });
 
-async function liveSearch(e) {
-  const query = e.target.value.trim();
+async function liveSearch() {
+  const query = document.getElementById('searchBox').value.trim();
+  const barcode = document.getElementById('barcodeBox').value.trim();
+  const category = document.getElementById('categoryFilter').value;
   const tbody = document.getElementById('searchResults');
-  if (!query) {
+
+  if (!query && !barcode && !category) {
     tbody.innerHTML = '';
     return;
   }
-  const res = await fetch(`/inventory/search?q=${encodeURIComponent(query)}`);
+
+  const res = await fetch(`/inventory/search?q=${encodeURIComponent(query)}&barcode=${barcode}&cat=${category}`);
   const data = await res.json();
   if (!data.success || !data.products) return;
+
   tbody.innerHTML = '';
   data.products.forEach(p => {
     const row = document.createElement('tr');
+    const lowStockStyle = p.quantity < 5 ? 'style="color:#ff5e62;font-weight:700;"' : '';
     row.innerHTML = `
-      <td>${p.name}</td>
+      <td ${lowStockStyle}>${p.name}</td>
       <td>${p.quantity}</td>
       <td>${p.price}</td>
-      <td><button onclick="addToCart(${p.id}, '${p.name}', ${p.price}, ${p.quantity})">➕</button></td>
-    `;
+      <td><button class="btn" onclick="addToCart(${p.id}, '${p.name}', ${p.price}, ${p.quantity})">➕</button></td>`;
     tbody.appendChild(row);
   });
 }
@@ -38,7 +65,7 @@ function addToCart(id, name, price, stock) {
   const existing = cart.find(i => i.id === id);
   if (existing) {
     if (existing.qty < stock) existing.qty++;
-    else return alert('Недостаточно товара на складе');
+    else return showToast('❌ Недостаточно товара на складе', 'error');
   } else {
     cart.push({ id, name, price, qty: 1, stock });
   }
@@ -55,16 +82,15 @@ function renderCart() {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${item.name}</td>
-      <td>
-        <input type="number" min="1" max="${item.stock}" value="${item.qty}" 
-               onchange="updateQty(${index}, this.value)">
-      </td>
+      <td><input type="number" min="1" max="${item.stock}" value="${item.qty}" onchange="updateQty(${index}, this.value)"></td>
       <td>${item.price}</td>
       <td>${sum.toFixed(2)}</td>
-      <td><button onclick="removeItem(${index})">❌</button></td>
-    `;
+      <td><button class="btn" onclick="removeItem(${index})">❌</button></td>`;
     tbody.appendChild(row);
   });
+
+  const discount = parseFloat(document.getElementById('discount').value) || 0;
+  if (discount > 0) total = total * (1 - discount / 100);
   document.getElementById('cartTotal').innerText = total.toFixed(2);
 }
 
@@ -74,7 +100,7 @@ function updateQty(index, newQty) {
     cart[index].qty = newQty;
     renderCart();
   } else {
-    alert('Неверное количество');
+    showToast('❌ Неверное количество', 'error');
   }
 }
 
@@ -83,21 +109,49 @@ function removeItem(index) {
   renderCart();
 }
 
+function openShift() {
+  if (shiftOpen) return showToast('Смена уже открыта');
+  shiftOpen = true;
+  showToast('✅ Смена открыта');
+}
+
+async function closeShift() {
+  if (!shiftOpen) return showToast('❌ Смена не открыта', 'error');
+  try {
+    const res = await fetch('/reports/close-shift', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.success) {
+      shiftOpen = false;
+      showToast(`✅ Смена закрыта. Чеков: ${data.count}, сумма: ${data.total} сом`);
+      if (data.fileUrl) window.open(data.fileUrl, '_blank');
+    } else {
+      showToast('❌ Ошибка: ' + data.message, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Не удалось закрыть смену. Проверь сервер.', 'error');
+  }
+}
+
 async function submitReceipt() {
-  if (cart.length === 0) return alert('Чек пуст');
+  if (!shiftOpen) return showToast('❌ Смена не открыта', 'error');
+  if (cart.length === 0) return showToast('❌ Чек пуст', 'error');
+  const discount = parseFloat(document.getElementById('discount').value) || 0;
+  const paymentMethod = document.getElementById('paymentMethod').value;
+
   const res = await fetch('/sales/receipt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items: cart })
+    body: JSON.stringify({ items: cart, discount, paymentMethod })
   });
   const data = await res.json();
   if (data.success) {
-    alert('✅ Чек пробит. Сумма: ' + data.total);
+    showToast(`✅ Чек пробит. Сумма: ${data.total}`);
     if (data.fileUrl) window.open(data.fileUrl, '_blank');
     cart = [];
     renderCart();
   } else {
-    alert('❌ Ошибка при отправке: ' + data.message);
+    showToast('❌ Ошибка: ' + data.message, 'error');
   }
 }
 
@@ -106,45 +160,14 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.innerHTML = message;
   toast.style.cssText = `
-    background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
-    color: white;
-    padding: 12px 20px;
-    margin-top: 10px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    font-size: 14px;
-    animation: fadeInOut 4s forwards;
-  `;
+    background:${type==='success'?'#4caf50':type==='error'?'#f44336':'#2196f3'};
+    color:#fff;padding:12px 20px;margin-top:10px;border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);font-size:14px;animation:fadeInOut 4s forwards;`;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 4000);
 }
 
 const style = document.createElement('style');
 style.innerHTML = `
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(-10px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-10px); }
-}`;
+@keyframes fadeInOut {0%{opacity:0;transform:translateY(-10px)}10%{opacity:1;transform:translateY(0)}90%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}`;
 document.head.appendChild(style);
-
-async function closeShift() {
-  try {
-    const res = await fetch('/reports/close-shift', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
-    const data = await res.json();
-    if (data.success) {
-      showToast(`✅ Смена закрыта<br>Чеков: ${data.count}, сумма: ${data.total} сом<br>
-        <a href="${data.fileUrl}" target="_blank" style="color:#fff;text-decoration:underline;">📥 Скачать отчёт</a>`);
-    } else {
-      showToast('❌ Ошибка: ' + data.message, 'error');
-    }
-  } catch (err) {
-    console.error('Ошибка закрытия смены:', err);
-    showToast('❌ Не удалось закрыть смену. Проверь сервер.', 'error');
-  }
-}

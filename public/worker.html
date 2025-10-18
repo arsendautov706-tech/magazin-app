@@ -10,45 +10,71 @@
 <body class="worker-theme">
   <div class="topbar">
     <div class="brand">📦 Панель работника склада</div>
-    <nav>
-      <button onclick="showSection('inventoryBox')">Склад</button>
-      <button onclick="showSection('reportBox')">Сформировать отчёт</button>
-      <a class="nav-link" href="/logout">Выйти</a>
+    <button class="burger" id="burgerBtn">☰</button>
+    <nav id="mainNav">
+      <a href="#" class="btn" data-tab="inventoryBox">Склад</a>
+      <a href="#" class="btn" data-tab="reportBox">Отчёты</a>
+      <a href="/logout" class="btn">🚪 Выйти</a>
     </nav>
   </div>
 
   <main class="container">
-    <section id="inventoryBox" class="panel">
+    <!-- Склад -->
+    <section id="inventoryBox" class="tab-content active">
       <h2>📦 Склад</h2>
+      <div class="inventory-actions">
+        <button class="btn" onclick="openReceiveForm()">➕ Приход</button>
+        <button class="btn" onclick="openWriteOffForm()">➖ Списание</button>
+        <button class="btn" onclick="openMoveForm()">🔄 Перемещение</button>
+      </div>
       <form id="addForm">
         <input type="text" id="name" placeholder="Название товара" required>
         <input type="number" id="qty" placeholder="Количество" required>
         <input type="number" step="0.01" id="price" placeholder="Цена" required>
-        <button type="submit">➕ Добавить в склад</button>
+        <button type="submit" class="btn">➕ Добавить в склад</button>
       </form>
-      <table id="inventoryTable"><tbody></tbody></table>
+      <table id="inventoryTable" class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Остаток</th>
+            <th>Цена</th>
+            <th>Себестоимость</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </section>
 
-   <section id="reportBox" class="panel" style="display:none">
-  <h2>📝 Сформировать отчёт</h2>
-
-  <!-- Кнопка по завозу -->
-  <button onclick="closeInventoryShift()">Сформировать отчёт по завозу</button>
-
-  <!-- 🔥 ВСТАВЬ ЭТУ КНОПКУ СЮДА -->
-  <button onclick="generateInventoryReport()">📊 Общая стоимость склада</button>
-
-  <!-- Блок вывода результата -->
-  <div id="reportResult"></div>
-</section>
-
+    <!-- Отчёты -->
+    <section id="reportBox" class="tab-content">
+      <h2>📝 Отчёты</h2>
+      <button class="btn" onclick="closeInventoryShift()">📦 Отчёт по завозу</button>
+      <button class="btn" onclick="generateInventoryReport()">📊 Общая стоимость склада</button>
+      <button class="btn" onclick="generateStockReport()">📋 Остатки</button>
+      <button class="btn" onclick="generateAuditReport()">🔍 Инвентаризация</button>
+      <div id="reportResult"></div>
+    </section>
+  </main>
 
   <script src="/js/worker.js"></script>
   <script>
-    function showSection(id) {
-      document.querySelectorAll('main section').forEach(sec => sec.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const burgerBtn = document.getElementById('burgerBtn');
+      const nav = document.getElementById('mainNav');
+      burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
+      nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
+
+      document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+          document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+      });
+    });
   </script>
 </body>
 </html>
