@@ -103,3 +103,25 @@ body {
 .footer a:hover {
   text-decoration: underline;
 }
+body {
+  background: #ffffff;
+  color: #222;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Хедер */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #2d89ef, #6fa8dc);
+  color: #fff;
+  padding: 14px 24px;
+}
+.navbar ul {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+  margin: 0

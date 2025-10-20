@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Навигация по верхним кнопкам
+  // Верхняя навигация
   const tabs = document.querySelectorAll('.tab-content');
   const navBtns = document.querySelectorAll('.navbar .btn');
 
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // По умолчанию показываем первую секцию
   showTab('features');
 
-  // Словари деталей
+  // Тексты деталей
   const detailData = {
     benefit: {
       retail: `<h3>Розничная торговля</h3><p>Касса, учёт товаров, CRM, финансы.</p>`,
@@ -41,19 +41,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Обработчик внутренних кнопок
+  // Обработчик внутренних кнопок (toggle)
   document.querySelectorAll('.chip-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const type = btn.dataset.type;
       const key = btn.dataset.key;
+
       const targetBoxId =
         type === 'benefit' ? 'benefit-detail' :
         type === 'feature' ? 'feature-detail' : 'advantage-detail';
+
       const box = document.getElementById(targetBoxId);
       if (!box) return;
-      box.innerHTML = detailData[type][key] || '<p>Информация скоро появится.</p>';
-      box.style.display = 'block';
-      box.scrollIntoView({ behavior: 'smooth' });
+
+      // Если уже показан этот же текст → скрываем всё (и кнопки, и текст)
+      const parentSection = btn.closest('.tab-content');
+      if (box.dataset.active === key) {
+        parentSection.querySelector('.btn-group').style.display = 'flex';
+        box.innerHTML = '';
+        box.style.display = 'none';
+        box.dataset.active = '';
+      } else {
+        parentSection.querySelector('.btn-group').style.display = 'none';
+        box.innerHTML = detailData[type][key] || '<p>Информация скоро появится.</p>';
+        box.style.display = 'block';
+        box.dataset.active = key;
+        box.scrollIntoView({ behavior: 'smooth' });
+      }
     });
   });
 
