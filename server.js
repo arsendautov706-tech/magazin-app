@@ -80,6 +80,11 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+});
+
+
 
 app.get('/worker', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'worker.html'));
