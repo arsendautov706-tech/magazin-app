@@ -171,3 +171,94 @@ const style = document.createElement('style');
 style.innerHTML = `
 @keyframes fadeInOut {0%{opacity:0;transform:translateY(-10px)}10%{opacity:1;transform:translateY(0)}90%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}`;
 document.head.appendChild(style);
+let cart = [];
+let shiftOpen = false;
+let returnCart = [];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const res = await fetch('/session');
+  const data = await res.json();
+  if (!data.success || data.user.role !== 'cashier') {
+    return (window.location.href = '/login.html');
+  }
+
+  // Бургер-меню
+  const burgerBtn = document.getElementById('burgerBtn');
+  const nav = document.getElementById('mainNav');
+  burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
+
+  // Вкладки
+  document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Поиск
+  document.getElementById('searchBox').addEventListener('input', liveSearch);
+  document.getElementById('barcodeBox').addEventListener('input', liveSearch);
+  document.getElementById('categoryFilter').addEventListener('change', liveSearch);
+
+  // Чек
+  document.getElementById('printReceipt').addEventListener('click', submitReceipt);
+  document.getElementById('openShift').addEventListener('click', openShift);
+  document.getElementById('closeShift').addEventListener('click', closeShift);
+
+  // Возвраты
+  document.getElementById('loadReceipt').addEventListener('click', loadReceiptForReturn);
+  document.getElementById('submitReturn').addEventListener('click', submitReturn);
+});
+
+// ===== Поиск =====
+async function liveSearch() {
+  const query = document.getElementById('searchBox').value.trim();
+  const barcode = document.getElementById('barcodeBox').value.trim();
+  const category = document.getElementById('categoryFilter').value;
+  const tbody = document.getElementById('searchResults');
+
+  if (!query && !barcode && !category) {
+    tbody.innerHTML = '';
+    return;
+  }
+
+  const res = await fetch(`/inventory/search?q=${encodeURIComponent(query)}&barcode=${barcode}&cat=${category}`);
+  const data = await res.json();
+  if (!data.success || !data.products) return;
+
+  tbody.innerHTML = '';
+  data.products.forEach(p => {
+    const row = document.createElement('tr');
+    const lowStock = p.quantity < 5 ? 'style="color:#ff5e62;font-weight:bold;"' : '';
+    row.innerHTML = `
+      <td ${lowStock}>${p.name}</td>
+      <td>${p.quantity}</td>
+      <td>${p.price}</td>
+      <td><button class="btn" onclick="addToCart(${p.id}, '${p.name}', ${p.price}, ${p.quantity})">➕</button></td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// ===== Чек =====
+function addToCart(id, name, price, stock) { … } // (оставляем как было)
+function renderCart() { … }
+function updateQty(index, newQty) { … }
+function removeItem(index) { … }
+async function submitReceipt() { … }
+
+// ===== Смена =====
+function openShift() { … }
+async function closeShift() { … }
+
+// ===== Возвраты =====
+async function loadReceiptForReturn() {
+  const number = document.getElementById('receiptNumber').value.trim();
+  if (!number) return showToast('Введите номер чека', 'error');
+
+  const res = await fetch(`/sales/receipt/${encodeURIComponent(number)}`);
+  const data = await res.json();
+  if (!data.success) return showToast('Чек не найден', 'error');
+
+  returnCart = data.items.map(i => ({

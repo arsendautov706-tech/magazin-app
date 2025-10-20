@@ -14,6 +14,7 @@
     <nav id="mainNav">
       <a href="#" class="btn" data-tab="search">Поиск</a>
       <a href="#" class="btn" data-tab="cart">Чек</a>
+      <a href="#" class="btn" data-tab="returns">Возвраты</a>
       <a href="#" class="btn" data-tab="shift">Смена</a>
       <a href="/logout" class="btn">🚪 Выйти</a>
     </nav>
@@ -70,6 +71,28 @@
       </div>
       <div class="total"><strong>Итого: <span id="cartTotal">0</span> сом</strong></div>
       <button id="printReceipt" class="btn">🧾 Пробить чек</button>
+    </section>
+
+    <!-- Возвраты -->
+    <section id="returns" class="tab-content">
+      <h2>Возврат по чеку</h2>
+      <input type="text" id="receiptNumber" placeholder="Номер чека">
+      <button class="btn" id="loadReceipt">Загрузить чек</button>
+      <table class="table" style="margin-top:10px">
+        <thead>
+          <tr>
+            <th>Товар</th>
+            <th>Куплено</th>
+            <th>К возврату</th>
+            <th>Цена</th>
+            <th>Сумма</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="returnItems"></tbody>
+      </table>
+      <div class="total">Итого к возврату: <span id="returnTotal">0</span> сом</div>
+      <button class="btn" id="submitReturn">🔁 Провести возврат</button>
     </section>
 
     <!-- Смена -->

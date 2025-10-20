@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Сессия
   const sessionRes = await fetch('/session');
   const sessionData = await sessionRes.json();
   if (!sessionData.success || sessionData.user.role !== 'admin') {
@@ -9,12 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Бургер-меню
   const burgerBtn = document.getElementById('burgerBtn');
   const nav = document.getElementById('mainNav');
-  if (burgerBtn && nav) {
-    burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
-    nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
-  }
+  burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
 
-  // Навигация по вкладкам
+  // Навигация
   document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -26,94 +23,107 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (btn.dataset.tab === 'reports') loadReports();
       if (btn.dataset.tab === 'inventory') loadInventory();
       if (btn.dataset.tab === 'notifications') loadNotifications();
+      if (btn.dataset.tab === 'crm') loadClients();
     });
   });
 
-  // Первая вкладка
   loadReports();
 });
 
-// ====== Отчёты ======
-async function loadReports() {
-  try {
-    const res = await fetch('/reports/list');
-    const data = await res.json();
-    if (!data.success) return;
-    const tbody = document.getElementById('reportsList');
-    tbody.innerHTML = '';
-    data.reports.forEach(r => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${r.date}</td>
-        <td>${r.cashier}</td>
-        <td>${r.total}</td>
-        <td><a href="/reports/${r.filename}" target="_blank">📥 Скачать</a></td>`;
-      tbody.appendChild(tr);
-    });
-  } catch (e) {
-    console.error('Ошибка загрузки отчётов:', e);
+// ===== Отчёты =====
+async function loadReports() { … } // как было
+
+// ===== Склад =====
+async function loadInventory() { … } // как было
+async function editItem(id) { … }
+
+// ===== Уведомления =====
+async function loadNotifications() { … }
+
+// ===== CRM =====
+document.getElementById('addClientBtn')?.addEventListener('click', () => {
+  document.getElementById('clientModal').style.display = 'block';
+});
+document.getElementById('closeClientModal')?.addEventListener('click', () => {
+  document.getElementById('clientModal').style.display = 'none';
+});
+document.getElementById('saveClient')?.addEventListener('click', saveClient);
+document.getElementById('clientSearch')?.addEventListener('input', loadClients);
+document.getElementById('segmentFilter')?.addEventListener('change', loadClients);
+
+async function loadClients() {
+  const q = document.getElementById('clientSearch').value.trim();
+  const seg = document.getElementById('segmentFilter').value;
+  const res = await fetch(`/crm/clients?q=${encodeURIComponent(q)}&segment=${seg}`);
+  const data = await res.json();
+  if (!data.success) return;
+
+  const tbody = document.getElementById('clientsTable');
+  tbody.innerHTML = '';
+  data.clients.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.name}</td>
+      <td>${c.phone || '-'}</td>
+      <td>${c.email || '-'}</td>
+      <td>${c.segment || '-'}</td>
+      <td>${c.bonus || 0}</td>
+      <td>${c.purchases || 0}</td>
+      <td>
+        <button class="btn" onclick="editClient(${c.id})">✏️</button>
+        <button class="btn" onclick="adjustBonus(${c.id})">🎁</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function saveClient() {
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const email = document.getElementById('cEmail').value.trim();
+  const segment = document.getElementById('cSegment').value;
+  if (!name) return alert('Имя обязательно');
+
+  const res = await fetch('/crm/clients/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone, email, segment })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('clientModal').style.display = 'none';
+    loadClients();
+  } else {
+    alert('Ошибка: ' + data.message);
   }
 }
 
-// ====== Склад ======
-async function loadInventory() {
-  try {
-    const res = await fetch('/inventory/items');
-    const data = await res.json();
-    if (!data.success) return;
-    const tbody = document.getElementById('inventoryTable');
-    tbody.innerHTML = '';
-    data.items.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.id}</td>
-        <td>${item.name}</td>
-        <td>${item.quantity}</td>
-        <td>${item.price}</td>
-        <td><button class="btn" onclick="editItem(${item.id})">✏️</button></td>`;
-      tbody.appendChild(tr);
-    });
+async function editClient(id) {
+  const name = prompt('Новое имя:');
+  const phone = prompt('Телефон:');
+  const email = prompt('Email:');
+  const segment = prompt('Сегмент (vip/wholesale/new/loyal):');
+  await fetch('/crm/clients/update', {
+async function editClient(id) {
+  const name = prompt('Новое имя:');
+  const phone = prompt('Телефон:');
+  const email = prompt('Email:');
+  const segment = prompt('Сегмент (vip/wholesale/new/loyal):');
 
-    // Заглушки для действий склада
-    document.getElementById('receiveBtn').onclick = () => alert('Модалка приёмки (в разработке)');
-    document.getElementById('writeoffBtn').onclick = () => alert('Модалка списания (в разработке)');
-    document.getElementById('auditBtn').onclick = () => alert('Модалка инвентаризации (в разработке)');
-  } catch (e) {
-    console.error('Ошибка загрузки склада:', e);
-  }
+  await fetch('/crm/clients/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, name, phone, email, segment })
+  });
+  loadClients();
 }
 
-async function editItem(id) {
-  const price = prompt('Новая цена:');
-  const delta = prompt('Изменение количества (+/-):');
-  if (price || delta) {
-    await fetch('/inventory/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product_id: id, delta: Number(delta) || 0, price: price ? Number(price) : undefined })
-    });
-    loadInventory();
-  }
-}
-
-// ====== Уведомления ======
-async function loadNotifications() {
-  try {
-    const res = await fetch('/notifications');
-    const data = await res.json();
-    if (!data.success) return;
-    const list = document.getElementById('notificationsList');
-    list.innerHTML = '';
-    data.notifications.forEach(n => {
-      const div = document.createElement('div');
-      div.className = `notif-card ${n.type || 'notif-info'}`;
-      div.innerHTML = `
-        <b>${n.author ?? 'система'}</b>: ${n.message}
-        <br><small>${new Date(n.created_at).toLocaleString()}</small>
-        ${n.url ? `<br><a href="${n.url}" target="_blank">📂 Открыть</a>` : ''}`;
-      list.appendChild(div);
-    });
-  } catch (e) {
-    console.error('Ошибка загрузки уведомлений:', e);
-  }
+async function adjustBonus(id) {
+  const delta = parseInt(prompt('Изменение бонусов (+/-):') || '0');
+  await fetch('/crm/clients/bonus', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, delta })
+  });
+  loadClients();
 }

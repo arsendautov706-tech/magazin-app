@@ -13,7 +13,7 @@
       <a href="#" class="btn" data-tab="reports">Отчёты</a>
       <a href="#" class="btn" data-tab="inventory">Склад</a>
       <a href="#" class="btn" data-tab="notifications">Уведомления</a>
-      <a href="/dashboard.html" class="btn">Дашборд</a>
+      <a href="#" class="btn" data-tab="crm">Клиенты</a>
       <a href="/logout" class="btn">🚪 Выйти</a>
     </nav>
   </div>
@@ -38,11 +38,6 @@
     <!-- Склад -->
     <section id="inventory" class="tab-content">
       <h2>📦 Склад</h2>
-      <div class="inventory-actions">
-        <button class="btn" id="receiveBtn">➕ Приход</button>
-        <button class="btn" id="writeoffBtn">➖ Списание</button>
-        <button class="btn" id="auditBtn">📋 Инвентаризация</button>
-      </div>
       <table class="table">
         <thead>
           <tr>
@@ -60,7 +55,56 @@
     <!-- Уведомления -->
     <section id="notifications" class="tab-content">
       <h2>🔔 Уведомления</h2>
-      <div id="notificationsList" class="notif-grid"></div>
+      <div id="notificationsList"></div>
+    </section>
+
+    <!-- CRM -->
+    <section id="crm" class="tab-content">
+      <h2>👥 Клиенты</h2>
+      <div class="crm-actions">
+        <button class="btn" id="addClientBtn">➕ Новый клиент</button>
+        <input type="text" id="clientSearch" placeholder="Поиск по имени/телефону/email">
+        <select id="segmentFilter">
+          <option value="">Все сегменты</option>
+          <option value="vip">VIP</option>
+          <option value="wholesale">Опт</option>
+          <option value="new">Новый</option>
+          <option value="loyal">Лояльный</option>
+        </select>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Имя</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th>Сегмент</th>
+            <th>Бонусы</th>
+            <th>Покупки</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="clientsTable"></tbody>
+      </table>
+
+      <!-- Модалка -->
+      <div id="clientModal" class="modal" style="display:none">
+        <div class="modal-content">
+          <h3>Новый клиент</h3>
+          <input id="cName" placeholder="Имя">
+          <input id="cPhone" placeholder="Телефон">
+          <input id="cEmail" placeholder="Email">
+          <select id="cSegment">
+            <option value="">Сегмент</option>
+            <option value="vip">VIP</option>
+            <option value="wholesale">Опт</option>
+            <option value="new">Новый</option>
+            <option value="loyal">Лояльный</option>
+          </select>
+          <button class="btn" id="saveClient">Сохранить</button>
+          <button class="btn" id="closeClientModal">Закрыть</button>
+        </div>
+      </div>
     </section>
   </main>
 
