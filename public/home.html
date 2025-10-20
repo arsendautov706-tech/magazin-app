@@ -19,33 +19,40 @@
   </header>
 
   <main class="container">
+    <!-- Возможности -->
     <section id="features" class="tab-content">
-      <ul>
-        <li>Учёт товаров и складские операции</li>
-        <li>CRM для работы с клиентами</li>
-        <li>Финансовый учёт и отчёты</li>
-        <li>Интеграция с маркетплейсами</li>
-      </ul>
+      <div class="btn-group">
+        <button class="chip-btn" data-type="feature" data-key="stock">Учёт товаров и складские операции</button>
+        <button class="chip-btn" data-type="feature" data-key="crm">CRM для работы с клиентами</button>
+        <button class="chip-btn" data-type="feature" data-key="finance">Финансовый учёт и отчёты</button>
+        <button class="chip-btn" data-type="feature" data-key="marketplaces">Интеграция с маркетплейсами</button>
+      </div>
+      <div id="feature-detail" class="info-box"></div>
     </section>
 
+    <!-- Кому выгодно -->
     <section id="benefits" class="tab-content">
-      <div class="benefit-grid">
-        <div class="benefit-card">🏬 Розничной торговле</div>
-        <div class="benefit-card">📦 Оптовой торговле</div>
-        <div class="benefit-card">🛒 Онлайн‑торговле</div>
-        <div class="benefit-card">🏭 Производству</div>
+      <div class="btn-group">
+        <button class="chip-btn" data-type="benefit" data-key="retail">🏬 Розничной торговле</button>
+        <button class="chip-btn" data-type="benefit" data-key="wholesale">📦 Оптовой торговле</button>
+        <button class="chip-btn" data-type="benefit" data-key="online">🛒 Онлайн‑торговле</button>
+        <button class="chip-btn" data-type="benefit" data-key="manufacturing">🏭 Производству</button>
       </div>
+      <div id="benefit-detail" class="info-box"></div>
     </section>
 
+    <!-- Преимущества -->
     <section id="advantages" class="tab-content">
-      <div class="adv-grid">
-        <div class="adv-card">☁️ Работа из облака</div>
-        <div class="adv-card">🔗 Интеграции</div>
-        <div class="adv-card">📊 Отчёты и аналитика</div>
-        <div class="adv-card">🔒 Безопасность</div>
+      <div class="btn-group">
+        <button class="chip-btn" data-type="advantage" data-key="cloud">☁️ Работа из облака</button>
+        <button class="chip-btn" data-type="advantage" data-key="integrations">🔗 Интеграции</button>
+        <button class="chip-btn" data-type="advantage" data-key="analytics">📊 Отчёты и аналитика</button>
+        <button class="chip-btn" data-type="advantage" data-key="security">🔒 Безопасность</button>
       </div>
+      <div id="advantage-detail" class="info-box"></div>
     </section>
 
+    <!-- Отзывы -->
     <section id="reviews" class="tab-content">
       <div class="review-grid">
         <div class="review-card">«Magazin ERP помог нам автоматизировать склад и продажи.» — Иван</div>
