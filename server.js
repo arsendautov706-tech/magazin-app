@@ -80,14 +80,33 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
 app.get('/home', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
+// Админ
+app.get('/admin', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.redirect('/login.html');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
-
+// Работник склада
 app.get('/worker', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'worker') {
+    return res.redirect('/login.html');
+  }
   res.sendFile(path.join(__dirname, 'public', 'worker.html'));
+});
+
+// Кассир (если есть отдельная панель)
+app.get('/cashier', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'cashier') {
+    return res.redirect('/login.html');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'cashier.html'));
 });
 
 app.get('/login', (req, res) => {
