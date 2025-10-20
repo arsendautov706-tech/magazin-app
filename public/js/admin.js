@@ -5,13 +5,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return (window.location.href = '/login.html');
   }
 
-  // Бургер-меню
   const burgerBtn = document.getElementById('burgerBtn');
   const nav = document.getElementById('mainNav');
   burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
   nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
 
-  // Навигация
   document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -30,17 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadReports();
 });
 
-// ===== Отчёты =====
-async function loadReports() { … } // как было
+async function loadReports() {}
+async function loadInventory() {}
+async function editItem(id) {}
+async function loadNotifications() {}
 
-// ===== Склад =====
-async function loadInventory() { … } // как было
-async function editItem(id) { … }
-
-// ===== Уведомления =====
-async function loadNotifications() { … }
-
-// ===== CRM =====
 document.getElementById('addClientBtn')?.addEventListener('click', () => {
   document.getElementById('clientModal').style.display = 'block';
 });
@@ -98,12 +90,6 @@ async function saveClient() {
   }
 }
 
-async function editClient(id) {
-  const name = prompt('Новое имя:');
-  const phone = prompt('Телефон:');
-  const email = prompt('Email:');
-  const segment = prompt('Сегмент (vip/wholesale/new/loyal):');
-  await fetch('/crm/clients/update', {
 async function editClient(id) {
   const name = prompt('Новое имя:');
   const phone = prompt('Телефон:');

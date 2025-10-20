@@ -19,7 +19,12 @@
   </div>
 
   <main class="container">
-    <!-- Отчёты -->
+    <p class="no-access">
+      У вас нет доступа к этой роли. 
+      <a href="/login.html">Войдите</a> или 
+      <a href="/register.html">зарегистрируйтесь</a>.
+    </p>
+
     <section id="reports" class="tab-content active">
       <h2>📑 Отчёты</h2>
       <table class="table">
@@ -35,7 +40,6 @@
       </table>
     </section>
 
-    <!-- Склад -->
     <section id="inventory" class="tab-content">
       <h2>📦 Склад</h2>
       <table class="table">
@@ -52,13 +56,11 @@
       </table>
     </section>
 
-    <!-- Уведомления -->
     <section id="notifications" class="tab-content">
       <h2>🔔 Уведомления</h2>
       <div id="notificationsList"></div>
     </section>
 
-    <!-- CRM -->
     <section id="crm" class="tab-content">
       <h2>👥 Клиенты</h2>
       <div class="crm-actions">
@@ -87,7 +89,6 @@
         <tbody id="clientsTable"></tbody>
       </table>
 
-      <!-- Модалка -->
       <div id="clientModal" class="modal" style="display:none">
         <div class="modal-content">
           <h3>Новый клиент</h3>
