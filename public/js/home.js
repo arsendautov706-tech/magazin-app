@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Навигация
   const tabs = document.querySelectorAll('.tab-content');
   const navBtns = document.querySelectorAll('.navbar .btn');
 
@@ -16,23 +15,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  showTab('features'); // по умолчанию
+  showTab('features');
 
-  // Расширенные тексты
   const detailData = {
     advantage: {
       cloud: `
         <h3>☁️ Работа из облака</h3>
-        <p>Magazin ERP доступен с любого устройства — ноутбук, планшет, смартфон.</p>
+        <p>Magazin ERP доступен с любого устройства.</p>
         <ul>
-          <li>Автоматические обновления без остановки работы</li>
-          <li>Резервное копирование и защита данных</li>
-          <li>Масштабируемость под рост бизнеса</li>
+          <li>Автоматические обновления</li>
+          <li>Резервное копирование</li>
+          <li>Масштабируемость</li>
         </ul>
       `,
       integrations: `
         <h3>🔗 Интеграции</h3>
-        <p>Система легко соединяется с внешними сервисами:</p>
+        <p>Соединение с внешними сервисами:</p>
         <ul>
           <li>Кассы и онлайн‑оплата</li>
           <li>CRM и бухгалтерия</li>
@@ -41,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `,
       analytics: `
         <h3>📊 Отчёты и аналитика</h3>
-        <p>Получайте полную картину бизнеса:</p>
+        <p>Полная картина бизнеса:</p>
         <ul>
           <li>Дашборды KPI</li>
           <li>Экспорт в Excel/CSV</li>
@@ -50,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `,
       security: `
         <h3>🔒 Безопасность</h3>
-        <p>Ваши данные под надёжной защитой:</p>
+        <p>Ваши данные под защитой:</p>
         <ul>
           <li>SSL‑шифрование</li>
           <li>Резервные копии</li>
@@ -60,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Toggle для внутренних кнопок
   document.querySelectorAll('.chip-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const type = btn.dataset.type;
@@ -87,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Футер
   const footerText = document.getElementById("footer-text");
   if (footerText) {
     const now = new Date();
