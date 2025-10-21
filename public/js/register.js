@@ -3,11 +3,14 @@ const regMsg = document.getElementById('regMsg');
 
 regForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('username').value.trim();
+
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value.trim();
   const confirmPassword = document.getElementById('confirmPassword').value.trim();
+  const role = document.getElementById('role').value;
 
-  if (!email || !password || !confirmPassword) {
+  if (!username || !email || !password || !confirmPassword) {
     regMsg.textContent = '❌ Заполните все поля';
     regMsg.style.color = 'red';
     return;
@@ -23,13 +26,13 @@ regForm.addEventListener('submit', async (e) => {
     const res = await fetch('/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ username, email, password, role })
     });
 
     const data = await res.json();
 
     if (data.success) {
-      regMsg.textContent = '✅ Регистрация успешна! Теперь войдите.';
+      regMsg.textContent = '✅ Регистрация успешна! Сейчас вы будете перенаправлены...';
       regMsg.style.color = 'green';
       setTimeout(() => window.location.href = '/login.html', 1500);
     } else {

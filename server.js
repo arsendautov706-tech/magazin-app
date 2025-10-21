@@ -256,13 +256,19 @@ app.post('/register', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Все поля обязательны для заполнения'
+      });
+    }
+
     const result = await pool.query(
-      'SELECT * FROM users WHERE username = $1 OR email = $2',
+      'SELECT id FROM users WHERE username = $1 OR email = $2',
       [username, email]
     );
-    const existing = result.rows;
 
-    if (existing.length > 0) {
+    if (result.rows.length > 0) {
       return res.status(409).json({
         success: false,
         message: 'Пользователь с таким именем или email уже существует'
@@ -278,26 +284,17 @@ app.post('/register', async (req, res) => {
 
     res.json({ success: true, message: 'Регистрация успешна' });
   } catch (err) {
+    console.error('Ошибка при регистрации:', err);
     if (err.code === '23505') {
       return res.status(409).json({
         success: false,
         message: 'Такой пользователь уже существует'
       });
     }
-
     res.status(500).json({
       success: false,
       message: 'Ошибка сервера при регистрации'
     });
-  }
-});
-
-app.get('/api/users', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, username, email, role FROM users');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка при получении пользователей' });
   }
 });
 

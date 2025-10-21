@@ -23,9 +23,17 @@
 
   <div class="form-container">
     <form id="registerForm" class="auth-form">
-      <input type="text" id="username" placeholder="Email" required>
+      <input type="text" id="username" placeholder="Имя пользователя" required>
+      <input type="email" id="email" placeholder="Email" required>
       <input type="password" id="password" placeholder="Пароль" required>
       <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+
+      <select id="role" required>
+        <option value="cashier">Кассир</option>
+        <option value="worker">Сотрудник</option>
+        <option value="admin">Администратор</option>
+      </select>
+
       <button type="submit" class="btn">Зарегистрироваться</button>
     </form>
     <div id="regMsg" class="form-msg"></div>

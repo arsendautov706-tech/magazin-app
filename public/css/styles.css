@@ -150,3 +150,16 @@ body {
 .footer a:hover {
   text-decoration: underline;
 }
+.auth-form select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.auth-form select:focus {
+  border-color: #2d89ef;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(45,137,239,0.2);
+}
