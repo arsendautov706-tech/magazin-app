@@ -206,7 +206,17 @@ app.post('/login', async (req, res) => {
       role: user.role
     };
 
-    res.json({ success: true, user: req.session.user });
+    // 🔹 редирект по роли
+    if (user.role === 'admin') {
+      return res.redirect('/admin');
+    } else if (user.role === 'worker') {
+      return res.redirect('/worker');
+    } else if (user.role === 'cashier') {
+      return res.redirect('/cashier');
+    } else {
+      return res.redirect('/home');
+    }
+
   } catch (err) {
     console.error('Ошибка при входе:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
