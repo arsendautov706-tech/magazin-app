@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <title>Регистрация</title>
-  <!-- Подключаем общий стиль -->
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -12,76 +11,26 @@
     <nav>
       <ul>
         <li><a href="/">Главная</a></li>
-        <li><a href="/login.html">Войти</a></li>
+        <li><a href="/login.html">Вход</a></li>
       </ul>
     </nav>
   </header>
 
   <section class="hero">
     <h1>Регистрация</h1>
-    <p>Создайте аккаунт и начните работу в системе</p>
+    <p>Создайте новый аккаунт</p>
   </section>
 
-  <div class="container" style="max-width:400px; margin:40px auto;">
-    <form id="registerForm">
-      <input type="text" id="username" placeholder="Имя пользователя" required>
-      <input type="email" id="email" placeholder="Email" required>
+  <div class="form-container">
+    <form id="registerForm" class="auth-form">
+      <input type="text" id="username" placeholder="Email" required>
       <input type="password" id="password" placeholder="Пароль" required>
-      <select id="role">
-        <option value="worker">Работник склада</option>
-        <option value="cashier">Кассир</option>
-        <option value="admin">Админ</option>
-      </select>
-      <button type="submit" class="btn-primary">Зарегистрироваться</button>
+      <input type="password" id="confirmPassword" placeholder="Повторите пароль" required>
+      <button type="submit" class="btn">Зарегистрироваться</button>
     </form>
-    <div id="result" style="margin-top:20px;"></div>
+    <div id="regMsg" class="form-msg"></div>
   </div>
 
-  <script>
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const role = document.getElementById('role').value;
-
-      if (!username || !email || !password) {
-        return alert('Заполните все поля');
-      }
-
-      try {
-        const res = await fetch('/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password, role })
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          // сразу логиним
-          const loginRes = await fetch('/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
-          const loginData = await loginRes.json();
-
-          if (loginData.success && loginData.user?.role) {
-            const userRole = loginData.user.role;
-            if (userRole === 'admin') window.location.href = '/admin.html';
-            else if (userRole === 'cashier') window.location.href = '/cashier.html';
-            else if (userRole === 'worker') window.location.href = '/worker.html';
-            else window.location.href = '/';
-          } else {
-            document.getElementById('result').innerText = 'Регистрация прошла, но вход не удался';
-          }
-        } else {
-          document.getElementById('result').innerText = '❌ Ошибка: ' + (data.message || 'Не удалось зарегистрировать');
-        }
-      } catch (err) {
-        document.getElementById('result').innerText = 'Ошибка сети: ' + err.message;
-      }
-    });
-  </script>
+  <script src="/js/register.js"></script>
 </body>
 </html>
