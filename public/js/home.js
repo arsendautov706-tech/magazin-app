@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Навигация
   const tabs = document.querySelectorAll('.tab-content');
   const navBtns = document.querySelectorAll('.navbar .btn');
 
@@ -15,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  showTab('features');
+  showTab('features'); // по умолчанию
 
+  // Расширенные тексты
   const detailData = {
     advantage: {
       cloud: `
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Toggle для внутренних кнопок
   document.querySelectorAll('.chip-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const type = btn.dataset.type;
@@ -84,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Футер
   const footerText = document.getElementById("footer-text");
   if (footerText) {
     const now = new Date();
