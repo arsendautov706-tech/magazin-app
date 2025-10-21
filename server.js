@@ -199,6 +199,7 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Неверный пароль' });
     }
 
+    // сохраняем пользователя в сессии
     req.session.user = {
       id: user.id,
       username: user.username,
@@ -206,16 +207,8 @@ app.post('/login', async (req, res) => {
       role: user.role
     };
 
-    // 🔹 редирект по роли
-    if (user.role === 'admin') {
-      return res.redirect('/admin');
-    } else if (user.role === 'worker') {
-      return res.redirect('/worker');
-    } else if (user.role === 'cashier') {
-      return res.redirect('/cashier');
-    } else {
-      return res.redirect('/home');
-    }
+    // ✅ всегда возвращаем JSON, без res.redirect
+    res.json({ success: true, user: req.session.user });
 
   } catch (err) {
     console.error('Ошибка при входе:', err);
