@@ -181,7 +181,6 @@ app.get('/cashier', (req, res) => {
 const inventoryRouter = require('./routes/inventory');
 app.use('/inventory', inventoryRouter);
 
-
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -190,22 +189,26 @@ app.post('/login', async (req, res) => {
     }
 
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    const rows = result.rows;
-
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Пользователь не найден' });
     }
 
-    const user = rows[0];
+    const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password);
-
     if (!match) {
       return res.status(401).json({ success: false, message: 'Неверный пароль' });
     }
 
-    req.session.user = { id: user.id, role: user.role };
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+
     res.json({ success: true, user: req.session.user });
   } catch (err) {
+    console.error('Ошибка при входе:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
