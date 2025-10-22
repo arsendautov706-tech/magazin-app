@@ -5,17 +5,13 @@ const path = require('path');
 const helmet = require('helmet');
 require('dotenv').config();
 
-const pool = require('./db');             
+const pool = require('./db');              
 const initDatabase = require('./init-db'); 
+
 const app = express();
-app.set('trust proxy', 1); 
+app.set('trust proxy', 1);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-module.exports = { pool };
-
+initDatabase(pool);
 
 const sessionStore = new pgSession({ pool });
 
@@ -25,7 +21,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
   }
 }));
 
