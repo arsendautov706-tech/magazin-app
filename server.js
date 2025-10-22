@@ -3,6 +3,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const helmet = require('helmet');
+const fs = require('fs');            // ✅ добавили fs
 require('dotenv').config();
 
 const pool = require('./db');              
@@ -35,6 +36,7 @@ if (!fs.existsSync(reportsDir)) {
 } else {
   console.log('📁 Папка reports уже существует');
 }
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
