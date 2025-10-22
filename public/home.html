@@ -4,6 +4,18 @@
   <meta charset="utf-8" />
   <title>Magazin ERP</title>
   <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    /* Анимация для плавного появления текста */
+    .info-box {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      min-height: 60px;
+      padding: 10px;
+    }
+    .info-box.fade-in {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
   <header class="navbar">
@@ -67,8 +79,8 @@
   </main>
 
   <footer class="footer">
-    <p id="footer-text"></p>
-    <p><a href="#">Политика конфиденциальности</a> | <a href="#">Контакты</a></p>
+    <p>© 2015–2025 Magazin ERP | Текущая версия: 10.25</p>
+    <p><a href="/privacy.html">Политика конфиденциальности</a> | <a href="/contacts.html">Контакты</a></p>
   </footer>
 
   <script src="/js/home.js"></script>
