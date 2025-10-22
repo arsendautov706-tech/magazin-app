@@ -1,14 +1,14 @@
 const express = require('express');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const fs = require('fs');
 const path = require('path');
 const helmet = require('helmet');
-const { Pool } = require('pg');
 require('dotenv').config();
-const pool = require('./db');
 
+const pool = require('./db');             
+const initDatabase = require('./init-db'); 
 const app = express();
+app.set('trust proxy', 1); 
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
