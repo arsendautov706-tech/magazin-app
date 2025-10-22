@@ -6,6 +6,7 @@ const path = require('path');
 const helmet = require('helmet');
 const { Pool } = require('pg');
 require('dotenv').config();
+const pool = require('./db');
 
 const app = express();
 
@@ -215,6 +216,17 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+app.get('/crm/clients', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM clients');
+    res.json({ success: true, clients: result.rows });
+  } catch (err) {
+    console.error('Ошибка при получении клиентов:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+
 
 app.get('/session', (req, res) => {
   if (!req.session?.user) return res.json({ success: false });
