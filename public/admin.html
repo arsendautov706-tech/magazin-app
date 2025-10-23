@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Panel</title>
+  <title>Панель администратора | Magazin ERP</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -10,7 +10,7 @@
     <div class="brand">📊 Панель администратора</div>
     <button class="burger" id="burgerBtn">☰</button>
     <nav id="mainNav">
-      <a href="#" class="btn" data-tab="reports">Отчёты</a>
+      <a href="#" class="btn active" data-tab="reports">Отчёты</a>
       <a href="#" class="btn" data-tab="inventory">Склад</a>
       <a href="#" class="btn" data-tab="notifications">Уведомления</a>
       <a href="#" class="btn" data-tab="crm">Клиенты</a>
@@ -19,22 +19,11 @@
   </div>
 
   <main class="container">
-    <p class="no-access">
-      У вас нет доступа к этой роли. 
-      <a href="/login.html">Войдите</a> или 
-      <a href="/register.html">зарегистрируйтесь</a>.
-    </p>
-
     <section id="reports" class="tab-content active">
       <h2>📑 Отчёты</h2>
       <table class="table">
         <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Кассир</th>
-            <th>Сумма</th>
-            <th>Файл</th>
-          </tr>
+          <tr><th>Дата</th><th>Кассир</th><th>Сумма</th><th>Файл</th></tr>
         </thead>
         <tbody id="reportsList"></tbody>
       </table>
@@ -44,13 +33,7 @@
       <h2>📦 Склад</h2>
       <table class="table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Остаток</th>
-            <th>Цена</th>
-            <th>Действие</th>
-          </tr>
+          <tr><th>ID</th><th>Название</th><th>Остаток</th><th>Цена</th><th>Действие</th></tr>
         </thead>
         <tbody id="inventoryTable"></tbody>
       </table>
@@ -58,13 +41,13 @@
 
     <section id="notifications" class="tab-content">
       <h2>🔔 Уведомления</h2>
-      <div id="notificationsList"></div>
+      <div id="notificationsList" class="info-box">Нет новых уведомлений</div>
     </section>
 
     <section id="crm" class="tab-content">
       <h2>👥 Клиенты</h2>
       <div class="crm-actions">
-        <button class="btn" id="addClientBtn">➕ Новый клиент</button>
+        <button type="button" class="btn" id="addClientBtn">➕ Новый клиент</button>
         <input type="text" id="clientSearch" placeholder="Поиск по имени/телефону/email">
         <select id="segmentFilter">
           <option value="">Все сегменты</option>
@@ -77,13 +60,7 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Имя</th>
-            <th>Телефон</th>
-            <th>Email</th>
-            <th>Сегмент</th>
-            <th>Бонусы</th>
-            <th>Покупки</th>
-            <th></th>
+            <th>Имя</th><th>Телефон</th><th>Email</th><th>Сегмент</th><th>Бонусы</th><th>Покупки</th><th></th>
           </tr>
         </thead>
         <tbody id="clientsTable"></tbody>
@@ -108,6 +85,10 @@
       </div>
     </section>
   </main>
+
+  <footer class="footer">
+    <p>© 2025 Magazin ERP</p>
+  </footer>
 
   <script src="/js/admin.js" defer></script>
 </body>
