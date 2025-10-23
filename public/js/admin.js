@@ -36,9 +36,11 @@ async function loadNotifications() {}
 document.getElementById('addClientBtn')?.addEventListener('click', () => {
   document.getElementById('clientModal').style.display = 'block';
 });
+
 document.getElementById('closeClientModal')?.addEventListener('click', () => {
   document.getElementById('clientModal').style.display = 'none';
 });
+
 document.getElementById('saveClient')?.addEventListener('click', saveClient);
 document.getElementById('clientSearch')?.addEventListener('input', loadClients);
 document.getElementById('segmentFilter')?.addEventListener('change', loadClients);
@@ -62,8 +64,8 @@ async function loadClients() {
       <td>${c.bonus || 0}</td>
       <td>${c.purchases || 0}</td>
       <td>
-        <button class="btn" onclick="editClient(${c.id})">✏️</button>
-        <button class="btn" onclick="adjustBonus(${c.id})">🎁</button>
+        <button class="btn" onclick="editClient(${c.id})">✏️ Редактировать</button>
+        <button class="btn" onclick="adjustBonus(${c.id})">🎁 Бонусы</button>
       </td>`;
     tbody.appendChild(tr);
   });
@@ -74,7 +76,7 @@ async function saveClient() {
   const phone = document.getElementById('cPhone').value.trim();
   const email = document.getElementById('cEmail').value.trim();
   const segment = document.getElementById('cSegment').value;
-  if (!name) return alert('Имя обязательно');
+  if (!name) return alert('Пожалуйста, укажите имя клиента');
 
   const res = await fetch('/crm/clients/create', {
     method: 'POST',
@@ -86,15 +88,15 @@ async function saveClient() {
     document.getElementById('clientModal').style.display = 'none';
     loadClients();
   } else {
-    alert('Ошибка: ' + data.message);
+    alert('Ошибка при сохранении: ' + data.message);
   }
 }
 
 async function editClient(id) {
-  const name = prompt('Новое имя:');
-  const phone = prompt('Телефон:');
-  const email = prompt('Email:');
-  const segment = prompt('Сегмент (vip/wholesale/new/loyal):');
+  const name = prompt('Введите новое имя клиента:');
+  const phone = prompt('Введите новый телефон:');
+  const email = prompt('Введите новый email:');
+  const segment = prompt('Введите сегмент (vip, wholesale, new, loyal):');
 
   await fetch('/crm/clients/update', {
     method: 'POST',
@@ -105,7 +107,7 @@ async function editClient(id) {
 }
 
 async function adjustBonus(id) {
-  const delta = parseInt(prompt('Изменение бонусов (+/-):') || '0');
+  const delta = parseInt(prompt('Введите изменение бонусов (+/-):') || '0');
   await fetch('/crm/clients/bonus', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

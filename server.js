@@ -226,6 +226,22 @@ app.get('/crm/clients', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+app.post('/crm/clients/create', async (req, res) => {
+  const { name, phone, email, segment } = req.body;
+  if (!name) return res.json({ success: false, message: 'Имя обязательно' });
+
+  try {
+    await pool.query(
+      'INSERT INTO clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
+      [name, phone, email, segment]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Ошибка при добавлении клиента:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
 
 
 
