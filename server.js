@@ -3,16 +3,24 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const helmet = require('helmet');
-const fs = require('fs');            // ✅ добавили fs
+const fs = require('fs');
 require('dotenv').config();
 
-const pool = require('./db');              
-const initDatabase = require('./init-db'); 
+const pool = require('./db');
+const initDatabase = require('./init-db');
 
 const app = express();
 app.set('trust proxy', 1);
 
 initDatabase(pool);
+pool.query('SELECT current_database(), current_schema()', (err, result) => {
+  if (err) {
+    console.error('Ошибка при проверке базы:', err);
+  } else {
+    console.log('📌 Подключено к базе:', result.rows[0]);
+  }
+});
+
 
 const sessionStore = new pgSession({ pool });
 
@@ -22,7 +30,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'lax'
@@ -36,7 +44,6 @@ if (!fs.existsSync(reportsDir)) {
 } else {
   console.log('📁 Папка reports уже существует');
 }
-
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
