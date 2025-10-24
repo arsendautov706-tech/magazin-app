@@ -12,6 +12,19 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
+    // Clients
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS clients (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        phone TEXT,
+        email TEXT,
+        segment TEXT,
+        bonus INTEGER DEFAULT 0,
+        purchases INTEGER DEFAULT 0
+      )
+    `);
+
     // Products
     await pool.query(`
       CREATE TABLE IF NOT EXISTS products (
