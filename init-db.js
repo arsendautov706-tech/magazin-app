@@ -3,7 +3,7 @@ module.exports = async function initDatabase(pool) {
   try {
     // Users
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS public.users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) NOT NULL UNIQUE,
         email VARCHAR(100) NOT NULL UNIQUE,
@@ -14,7 +14,7 @@ module.exports = async function initDatabase(pool) {
 
     // Clients
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS clients (
+      CREATE TABLE IF NOT EXISTS public.clients (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
         phone TEXT,
@@ -27,7 +27,7 @@ module.exports = async function initDatabase(pool) {
 
     // Products
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS products (
+      CREATE TABLE IF NOT EXISTS public.products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         quantity INTEGER DEFAULT 0,
@@ -37,7 +37,7 @@ module.exports = async function initDatabase(pool) {
 
     // Inventory
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS inventory (
+      CREATE TABLE IF NOT EXISTS public.inventory (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         quantity INTEGER DEFAULT 0,
@@ -47,7 +47,7 @@ module.exports = async function initDatabase(pool) {
 
     // Inventory reports
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS inventory_reports (
+      CREATE TABLE IF NOT EXISTS public.inventory_reports (
         id SERIAL PRIMARY KEY,
         worker VARCHAR(50),
         date DATE DEFAULT CURRENT_DATE,
@@ -57,7 +57,7 @@ module.exports = async function initDatabase(pool) {
 
     // Cashier reports
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS cashier_reports (
+      CREATE TABLE IF NOT EXISTS public.cashier_reports (
         id SERIAL PRIMARY KEY,
         cashier_name VARCHAR(50),
         total NUMERIC(10,2),
@@ -68,7 +68,7 @@ module.exports = async function initDatabase(pool) {
 
     // Sales reports
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS sales_reports (
+      CREATE TABLE IF NOT EXISTS public.sales_reports (
         id SERIAL PRIMARY KEY,
         cashier VARCHAR(50),
         date DATE DEFAULT CURRENT_DATE,
@@ -78,9 +78,9 @@ module.exports = async function initDatabase(pool) {
 
     // Sales
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS sales (
+      CREATE TABLE IF NOT EXISTS public.sales (
         id SERIAL PRIMARY KEY,
-        product_id INTEGER REFERENCES products(id),
+        product_id INTEGER REFERENCES public.products(id),
         qty INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -88,11 +88,11 @@ module.exports = async function initDatabase(pool) {
 
     // Notifications
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS notifications (
+      CREATE TABLE IF NOT EXISTS public.notifications (
         id SERIAL PRIMARY KEY,
         type VARCHAR(50),
         message TEXT,
-        user_id INTEGER REFERENCES users(id),
+        user_id INTEGER REFERENCES public.users(id),
         url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -100,7 +100,7 @@ module.exports = async function initDatabase(pool) {
 
     // Reports
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS reports (
+      CREATE TABLE IF NOT EXISTS public.reports (
         id SERIAL PRIMARY KEY,
         cashier VARCHAR(50),
         total NUMERIC(10,2),
@@ -111,7 +111,7 @@ module.exports = async function initDatabase(pool) {
 
     // Sessions
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS sessions (
+      CREATE TABLE IF NOT EXISTS public.sessions (
         sid VARCHAR NOT NULL PRIMARY KEY,
         sess JSON NOT NULL,
         expire TIMESTAMP NOT NULL
@@ -119,7 +119,7 @@ module.exports = async function initDatabase(pool) {
     `);
 
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS IDX_sessions_expire ON sessions (expire)
+      CREATE INDEX IF NOT EXISTS IDX_sessions_expire ON public.sessions (expire)
     `);
 
     console.log('✅ Все таблицы проверены/созданы');
