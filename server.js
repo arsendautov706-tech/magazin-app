@@ -217,22 +217,25 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+// Получение клиентов
 app.get('/crm/clients', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM clients');
+    const result = await pool.query('SELECT * FROM public.clients');
     res.json({ success: true, clients: result.rows });
   } catch (err) {
     console.error('Ошибка при получении клиентов:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
+// Добавление клиента
 app.post('/crm/clients/create', async (req, res) => {
   const { name, phone, email, segment } = req.body;
   if (!name) return res.json({ success: false, message: 'Имя обязательно' });
 
   try {
     await pool.query(
-      'INSERT INTO clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
+      'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
       [name, phone, email, segment]
     );
     res.json({ success: true });
@@ -241,6 +244,7 @@ app.post('/crm/clients/create', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
 
 
 
