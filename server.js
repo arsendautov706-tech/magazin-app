@@ -241,10 +241,12 @@ app.post('/crm/clients/create', async (req, res) => {
   if (!name) return res.json({ success: false, message: 'Имя обязательно' });
 
   try {
-    await pool.query(
-      'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
-      [name, phone, email, segment]
-    );
+   await pool.query(
+  await pool.query(
+  'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
+  [name, phone, email, segment]
+);
+
     res.json({ success: true });
   } catch (err) {
     console.error('Ошибка при добавлении клиента:', err);
