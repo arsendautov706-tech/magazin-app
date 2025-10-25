@@ -1,4 +1,5 @@
 const express = require('express');
+const pool = require('./db');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
@@ -6,7 +7,6 @@ const helmet = require('helmet');
 const fs = require('fs');
 require('dotenv').config();
 
-const pool = require('./db');
 const initDatabase = require('./init-db');
 
 const app = express();
