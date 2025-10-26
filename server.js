@@ -240,6 +240,11 @@ app.post('/crm/clients/create', async (req, res) => {
   if (!name) return res.json({ success: false, message: 'Имя обязательно' });
 
   try {
+    // 👉 Логируем перед выполнением запроса
+    console.log("📌 SQL about to run:",
+      'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1,$2,$3,$4)');
+    console.log("📩 req.body:", req.body);
+
     await pool.query(
       'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
       [name, phone, email, segment]
@@ -251,7 +256,6 @@ app.post('/crm/clients/create', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
-
 
 
 
