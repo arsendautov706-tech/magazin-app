@@ -229,7 +229,7 @@ app.post('/login', async (req, res) => {
 // Получение клиентов
 app.get('/crm/clients', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM public.clients');
+    const result = await pool.query('SELECT * FROM public.clients ORDER BY client_id DESC');
     res.json({ success: true, clients: result.rows });
   } catch (err) {
     console.error('Ошибка при получении клиентов:', err);
@@ -237,57 +237,130 @@ app.get('/crm/clients', async (req, res) => {
   }
 });
 
+// Создание клиента
 app.post('/crm/clients/create', async (req, res) => {
-  const { name, phone, email, segment } = req.body;
-  if (!name) return res.json({ success: false, message: 'Имя обязательно' });
+  const { full_name, phone, email, segment } = req.body;
+  if (!full_name) return res.json({ success: false, message: 'ФИО обязательно' });
 
   try {
-    // 👉 Логируем перед выполнением запроса
-    console.log("📌 SQL about to run:",
-      'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1,$2,$3,$4)');
-    console.log("📩 req.body:", req.body);
-
-    await pool.query(
-      'INSERT INTO public.clients (name, phone, email, segment) VALUES ($1, $2, $3, $4)',
-      [name, phone, email, segment]
+    const result = await pool.query(
+      `INSERT INTO public.clients (full_name, phone, email, segment)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [full_name, phone, email, segment]
     );
 
-    res.json({ success: true });
+    res.json({ success: true, client: result.rows[0] });
   } catch (err) {
     console.error('Ошибка при добавлении клиента:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
+// Обновление клиента
 app.post('/crm/clients/update', async (req, res) => {
-  const { id, name, phone, email, segment } = req.body;
-  if (!id || !name) return res.json({ success: false, message: 'ID и имя обязательны' });
+  const { client_id, full_name, phone, email, segment } = req.body;
+  if (!client_id || !full_name) {
+    return res.json({ success: false, message: 'ID и ФИО обязательны' });
+  }
 
   try {
-    await pool.query(
-      'UPDATE public.clients SET name = $1, phone = $2, email = $3, segment = $4 WHERE id = $5',
-      [name, phone, email, segment, id]
+    const result = await pool.query(
+      `UPDATE public.clients
+       SET full_name = $1, phone = $2, email = $3, segment = $4
+       WHERE client_id = $5
+       RETURNING *`,
+      [full_name, phone, email, segment, client_id]
     );
-    res.json({ success: true });
+
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: 'Клиент не найден' });
+    }
+
+    res.json({ success: true, client: result.rows[0] });
   } catch (err) {
+    console.error('Ошибка при обновлении клиента:', err);
     res.json({ success: false, message: 'Ошибка обновления' });
   }
 });
 
+// Обновление бонусов
 app.post('/crm/clients/bonus', async (req, res) => {
-  const { id, delta } = req.body;
-  if (!id || isNaN(delta)) return res.json({ success: false, message: 'Неверные данные' });
+  const { client_id, delta } = req.body;
+  if (!client_id || isNaN(delta)) {
+    return res.json({ success: false, message: 'Неверные данные' });
+  }
 
   try {
-    await pool.query(
-      'UPDATE public.clients SET bonus = COALESCE(bonus, 0) + $1 WHERE id = $2',
-      [delta, id]
+    const result = await pool.query(
+      `UPDATE public.clients
+       SET bonus_points = COALESCE(bonus_points, 0) + $1
+       WHERE client_id = $2
+       RETURNING *`,
+      [delta, client_id]
     );
-    res.json({ success: true });
+
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: 'Клиент не найден' });
+    }
+
+    res.json({ success: true, client: result.rows[0] });
   } catch (err) {
+    console.error('Ошибка при обновлении бонусов:', err);
     res.json({ success: false, message: 'Ошибка бонуса' });
   }
 });
+// Получение одного клиента по ID
+app.get('/crm/clients/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const result = await pool.query(
+      'SELECT * FROM public.clients WHERE client_id = $1',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Клиент не найден' });
+    }
+
+    res.json({ success: true, client: result.rows[0] });
+  } catch (err) {
+    console.error('Ошибка при поиске клиента по ID:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
+
+// Универсальный поиск по имени, телефону или email
+app.get('/crm/clients/search', async (req, res) => {
+  try {
+    const { full_name, phone, email } = req.query;
+
+    let query = 'SELECT * FROM public.clients WHERE 1=1';
+    const params = [];
+    let i = 1;
+
+    if (full_name) {
+      query += ` AND full_name ILIKE $${i++}`;
+      params.push(`%${full_name}%`); // поиск по части имени
+    }
+    if (phone) {
+      query += ` AND phone = $${i++}`;
+      params.push(phone);
+    }
+    if (email) {
+      query += ` AND email = $${i++}`;
+      params.push(email);
+    }
+
+    const result = await pool.query(query, params);
+
+    res.json({ success: true, clients: result.rows });
+  } catch (err) {
+    console.error('Ошибка при поиске клиента:', err);
+    res.status(500).json({ success: false, message: 'Ошибка сервера' });
+  }
+});
 
 
 
