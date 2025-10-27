@@ -6,7 +6,33 @@
   <title>Главная — ERP для бизнеса</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css">
-
+  <style>
+    .accordion {
+      width: 100%;
+      border: none;
+      outline: none;
+      text-align: left;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      transition: background 0.3s;
+    }
+    .accordion:hover {
+      background: #e9e9e9;
+    }
+    .accordion.active {
+      background: #dcdcdc;
+    }
+    .panel {
+      display: none;
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      background: #fff;
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -36,61 +62,64 @@
     </div>
   </section>
 
-  <section id="features" class="section reveal">
+  <section id="accordion-section" class="section reveal">
     <div class="container">
-      <h2>Возможности</h2>
-      <div class="cards grid-2">
-        <article class="card"><h3>Учёт товаров и складские операции</h3><p>Управление товарами и ценами. Планирование закупок и контроль остатков. Резервы, модификации, инвентаризации.</p></article>
-        <article class="card"><h3>CRM для работы с клиентами</h3><p>История покупок, сегментация базы клиентов, бонусные программы лояльности. Телефония и рассылки.</p></article>
-        <article class="card"><h3>Финансовый учёт и отчёты</h3><p>Контроль взаиморасчётов, движение денежных средств, прибыль и убытки. Автоматическая генерация отчётов.</p></article>
-        <article class="card"><h3>Интеграция с маркетплейсами</h3><p>Ozon, Wildberries, Яндекс Маркет и другие. Автоматизация FBO/FBS, контроль прибыли с учётом комиссий.</p></article>
+      <button class="accordion">Отзывы</button>
+      <div class="panel">
+        <p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.” — Татьяна Матюшина</p>
+        <p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.” — Александр Авакян</p>
+        <p>“Навёл порядок на складах. Видим остатки, продажи и деньги.” — Светлана Михалева</p>
       </div>
-    </div>
-  </section>
 
-  <section id="audience" class="section alt reveal">
-    <div class="container">
-      <h2>Кому выгодно</h2>
-      <div class="cards grid-4">
-        <article class="card"><h3>Розничной торговле</h3><p>Касса, маркировка, остатки, акции и лояльность.</p></article>
-        <article class="card"><h3>Оптовой торговле</h3><p>Прайсы, резервы, контрагенты, счета и накладные.</p></article>
-        <article class="card"><h3>Онлайн‑торговле</h3><p>Интеграции с маркетплейсами, CMS и платёжами.</p></article>
-        <article class="card"><h3>Производству</h3><p>Техкарты, списания, партии и прослеживаемость.</p></article>
+      <button class="accordion">Преимущества</button>
+      <div class="panel">
+        <p><strong>Поддержка 24/7:</strong> чат, телефон и почта.</p>
+        <p><strong>Доступно:</strong> смартфон, планшет, компьютер.</p>
+        <p><strong>Просто:</strong> старт за 15 минут.</p>
       </div>
-    </div>
-  </section>
 
-  <section id="benefits" class="section reveal">
-    <div class="container">
-      <h2>Преимущества</h2>
-      <div class="benefits">
-        <div class="benefit"><strong>Поддержка 24/7:</strong> чат, телефон и почта.</div>
-        <div class="benefit"><strong>Доступно:</strong> смартфон, планшет, компьютер.</div>
-        <div class="benefit"><strong>Просто:</strong> старт за 15 минут.</div>
+      <button class="accordion">Кому выгодно</button>
+      <div class="panel">
+        <p>Розничной торговле: касса, маркировка, остатки, акции и лояльность.</p>
+        <p>Оптовой торговле: прайсы, резервы, контрагенты, счета и накладные.</p>
+        <p>Онлайн‑торговле: интеграции с маркетплейсами, CMS и платёжами.</p>
+        <p>Производству: техкарты, списания, партии и прослеживаемость.</p>
       </div>
-    </div>
-  </section>
 
-  <section id="testimonials" class="section alt reveal">
-    <div class="container">
-      <h2>Отзывы</h2>
-      <div class="cards grid-3">
-        <article class="card quote"><p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.”</p><div class="author">Татьяна Матюшина — MATU</div></article>
-        <article class="card quote"><p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.”</p><div class="author">Александр Авакян — R.A.W. LIFE</div></article>
-        <article class="card quote"><p>“Навёл порядок на складах. Видим остатки, продажи и деньги.”</p><div class="author">Светлана Михалева — Eggsellent</div></article>
+      <button class="accordion">Возможности</button>
+      <div class="panel">
+        <p>Учёт товаров и складские операции: управление товарами и ценами, планирование закупок и контроль остатков.</p>
+        <p>CRM для работы с клиентами: история покупок, сегментация базы клиентов, бонусные программы лояльности.</p>
+        <p>Финансовый учёт и отчёты: контроль взаиморасчётов, движение денежных средств, прибыль и убытки.</p>
+        <p>Интеграция с маркетплейсами: Ozon, Wildberries, Яндекс Маркет и другие.</p>
       </div>
     </div>
   </section>
 
   <section id="footer-info" class="section cta reveal">
-  <div class="container cta-inner">
-    <a class="btn btn-primary btn-lg" href="/privacy.html">Политика конфиденциальности</a>
-    <a class="btn btn-outline btn-lg" href="/contacts.html">Контакты</a>
-  </div>
-</section>
-
+    <div class="container cta-inner">
+      <a class="btn btn-primary btn-lg" href="/privacy.html">Политика конфиденциальности</a>
+      <a class="btn btn-outline btn-lg" href="/contacts.html">Контакты</a>
+    </div>
+  </section>
 
   <link rel="stylesheet" href="/styles.css">
   <script src="/animations.js"></script>
+  <script>
+    const accordions = document.querySelectorAll(".accordion");
+    accordions.forEach(btn => {
+      btn.addEventListener("click", () => {
+        accordions.forEach(b => {
+          if (b !== btn) {
+            b.classList.remove("active");
+            b.nextElementSibling.style.display = "none";
+          }
+        });
+        btn.classList.toggle("active");
+        let panel = btn.nextElementSibling;
+        panel.style.display = (panel.style.display === "block") ? "none" : "block";
+      });
+    });
+  </script>
 </body>
 </html>
