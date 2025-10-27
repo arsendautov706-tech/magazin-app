@@ -23,7 +23,7 @@ regForm.addEventListener('submit', async (e) => {
   }
 
   try {
-    const res = await fetch('/register', {
+    const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password, role })
@@ -39,7 +39,7 @@ regForm.addEventListener('submit', async (e) => {
       regMsg.textContent = data.message || 'Ошибка регистрации';
       regMsg.style.color = 'red';
     }
-  } catch (err) {
+  } catch {
     regMsg.textContent = 'Ошибка соединения с сервером';
     regMsg.style.color = 'red';
   }
