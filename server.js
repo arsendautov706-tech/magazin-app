@@ -258,6 +258,36 @@ app.post('/crm/clients/create', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+app.post('/crm/clients/update', async (req, res) => {
+  const { id, name, phone, email, segment } = req.body;
+  if (!id || !name) return res.json({ success: false, message: 'ID и имя обязательны' });
+
+  try {
+    await pool.query(
+      'UPDATE public.clients SET name = $1, phone = $2, email = $3, segment = $4 WHERE id = $5',
+      [name, phone, email, segment, id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, message: 'Ошибка обновления' });
+  }
+});
+
+app.post('/crm/clients/bonus', async (req, res) => {
+  const { id, delta } = req.body;
+  if (!id || isNaN(delta)) return res.json({ success: false, message: 'Неверные данные' });
+
+  try {
+    await pool.query(
+      'UPDATE public.clients SET bonus = COALESCE(bonus, 0) + $1 WHERE id = $2',
+      [delta, id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, message: 'Ошибка бонуса' });
+  }
+});
+
 
 
 

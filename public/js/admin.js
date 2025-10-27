@@ -80,6 +80,28 @@ async function loadClients() {
   });
 }
 
+async function saveClient() {
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const email = document.getElementById('cEmail').value.trim();
+  const segment = document.getElementById('cSegment').value;
+  if (!name) return alert('Укажите имя');
+
+  const res = await fetch('/crm/clients/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone, email, segment })
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('clientModal').style.display = 'none';
+    loadClients();
+  } else {
+    alert('Ошибка: ' + data.message);
+  }
+}
+
 async function editClient(id) {
   const name = prompt('Новое имя:');
   if (!name) return;
