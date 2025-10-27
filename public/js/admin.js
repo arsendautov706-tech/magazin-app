@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const burgerBtn = document.getElementById('burgerBtn');
   const nav = document.getElementById('mainNav');
   burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active'));
+ nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
 
   document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', e => {
