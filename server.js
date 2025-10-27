@@ -21,7 +21,7 @@ pool.query('SELECT current_database(), current_schema()', (err, result) => {
   }
 });
 
-app.use(express.static("public"));
+app.use(express.static('public'));
 
 const sessionStore = new pgSession({ pool });
 
@@ -37,6 +37,7 @@ app.use(session({
     sameSite: 'lax'
   }
 }));
+
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {

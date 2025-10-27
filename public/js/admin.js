@@ -80,7 +80,7 @@ async function loadClients() {
   });
 }
 
-aasync function editClient(id) {
+async function editClient(id) {
   const name = prompt('Новое имя:');
   if (!name) return;
   const phone = prompt('Новый телефон:');
@@ -91,6 +91,16 @@ aasync function editClient(id) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, name, phone, email, segment })
+  });
+  loadClients();
+}
+
+async function adjustBonus(id) {
+  const delta = parseInt(prompt('Изменение бонусов:') || '0');
+  await fetch('/crm/clients/bonus', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, delta })
   });
   loadClients();
 }

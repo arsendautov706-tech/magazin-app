@@ -21,7 +21,6 @@
 
   <main class="container">
     <section id="reports" class="tab-content active">
-      <h2>📑 Отчёты</h2>
       <table class="table">
         <thead><tr><th>Дата</th><th>Операция</th><th>Сумма</th></tr></thead>
         <tbody id="reportsList"></tbody>
@@ -29,7 +28,6 @@
     </section>
 
     <section id="inventory" class="tab-content">
-      <h2>📦 Склад</h2>
       <table class="table">
         <thead><tr><th>ID</th><th>Название</th><th>Остаток</th><th>Цена</th></tr></thead>
         <tbody id="inventoryTable"></tbody>
@@ -37,30 +35,51 @@
     </section>
 
     <section id="crm" class="tab-content">
-      <h2>👥 Клиенты</h2>
-      <button class="btn" id="addClientBtn">➕ Новый клиент</button>
+      <div class="crm-controls">
+        <button class="btn" id="addClientBtn">➕ Новый клиент</button>
+        <input id="clientSearch" placeholder="Поиск клиента">
+        <select id="segmentFilter">
+          <option value="">Все сегменты</option>
+          <option value="retail">Розничный</option>
+          <option value="wholesale">Оптовый</option>
+        </select>
+      </div>
       <table class="table">
-        <thead><tr><th>Имя</th><th>Телефон</th><th>Email</th><th>Сегмент</th></tr></thead>
+        <thead><tr><th>Имя</th><th>Телефон</th><th>Email</th><th>Сегмент</th><th>Бонусы</th><th>Покупки</th><th></th></tr></thead>
         <tbody id="clientsTable"></tbody>
       </table>
     </section>
 
     <section id="integrations" class="tab-content">
-      <h2>🔗 Интеграции</h2>
-      <ul>
-        <li>Интернет-магазины</li>
-        <li>Банки</li>
-        <li>Маркетплейсы</li>
-        <li>Онлайн-кассы</li>
-      </ul>
+      <div class="cards grid-2">
+        <div class="card"><h3>Интернет-магазины</h3><p>Shopify, Tilda, Bitrix, CMS</p></div>
+        <div class="card"><h3>Банки</h3><p>API-интеграция, выписки, синхронизация</p></div>
+        <div class="card"><h3>Маркетплейсы</h3><p>Ozon, Wildberries, Яндекс Маркет</p></div>
+        <div class="card"><h3>Онлайн-кассы</h3><p>АТОЛ, OrangeData, API‑подключение</p></div>
+      </div>
     </section>
 
     <section id="massops" class="tab-content">
-      <h2>⚙️ Массовые операции</h2>
-      <button class="btn">Массовая печать документов</button>
-      <button class="btn">Массовая обработка данных</button>
+      <div class="massops-controls">
+        <button class="btn">📄 Печать документов</button>
+        <button class="btn">📊 Обработка данных</button>
+      </div>
     </section>
   </main>
+
+  <div id="clientModal" class="modal">
+    <div class="modal-content">
+      <input id="cName" placeholder="Имя">
+      <input id="cPhone" placeholder="Телефон">
+      <input id="cEmail" placeholder="Email">
+      <select id="cSegment">
+        <option value="retail">Розничный</option>
+        <option value="wholesale">Оптовый</option>
+      </select>
+      <button class="btn" id="saveClient">💾 Сохранить</button>
+      <button class="btn" id="closeClientModal">❌ Закрыть</button>
+    </div>
+  </div>
 
   <footer class="footer"><p>© 2025 Magazin ERP</p></footer>
   <script src="/js/admin.js" defer></script>
