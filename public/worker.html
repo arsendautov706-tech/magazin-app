@@ -1,44 +1,40 @@
 <!doctype html>
-<html lang="ru" data-role="worker">
+<html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Работник склада</title>
+  <title>Работник склада | Magazin ERP</title>
   <link rel="stylesheet" href="/css/styles.css" />
-  <script src="/js/protect.js"></script>
 </head>
-<body class="worker-theme">
+<body>
   <div class="topbar">
     <div class="brand">📦 Панель работника склада</div>
     <button class="burger" id="burgerBtn">☰</button>
     <nav id="mainNav">
-      <a href="#" class="btn" data-tab="inventoryBox">Склад</a>
+      <a href="#" class="btn active" data-tab="inventoryBox">Склад</a>
       <a href="#" class="btn" data-tab="reportBox">Отчёты</a>
       <a href="/logout" class="btn">🚪 Выйти</a>
     </nav>
   </div>
 
   <main class="container">
-    <!-- Склад -->
     <section id="inventoryBox" class="tab-content active">
       <h2>📦 Склад</h2>
       <div class="inventory-actions">
-        <button class="btn" onclick="openReceiveForm()">➕ Приход</button>
-        <button class="btn" onclick="openWriteOffForm()">➖ Списание</button>
-        <button class="btn" onclick="openMoveForm()">🔄 Перемещение</button>
+        <button class="btn">➕ Приёмка</button>
+        <button class="btn">➖ Списание</button>
+        <button class="btn">🔄 Перемещение</button>
       </div>
       <form id="addForm">
         <input type="text" id="name" placeholder="Название товара" required>
         <input type="number" id="qty" placeholder="Количество" required>
         <input type="number" step="0.01" id="price" placeholder="Цена" required>
-        <button type="submit" class="btn">➕ Добавить в склад</button>
+        <button type="submit" class="btn">Добавить</button>
       </form>
       <table id="inventoryTable" class="table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Название</th>
-            <th>Остаток</th>
             <th>Цена</th>
             <th>Себестоимость</th>
             <th>Действия</th>
@@ -48,33 +44,20 @@
       </table>
     </section>
 
-    <!-- Отчёты -->
     <section id="reportBox" class="tab-content">
       <h2>📝 Отчёты</h2>
-      <button class="btn" onclick="closeInventoryShift()">📦 Отчёт по завозу</button>
-      <button class="btn" onclick="generateInventoryReport()">📊 Общая стоимость склада</button>
-      <button class="btn" onclick="generateStockReport()">📋 Остатки</button>
-      <button class="btn" onclick="generateAuditReport()">🔍 Инвентаризация</button>
+      <button class="btn">📦 Отчёт по завозу</button>
+      <button class="btn">📊 Общая стоимость склада</button>
+      <button class="btn">📋 Остатки</button>
+      <button class="btn">🔍 Инвентаризация</button>
       <div id="reportResult"></div>
     </section>
   </main>
 
-  <script src="/js/worker.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const burgerBtn = document.getElementById('burgerBtn');
-      const nav = document.getElementById('mainNav');
-      burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
-      nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
+  <footer class="footer">
+    <p>© 2025 Magazin ERP</p>
+  </footer>
 
-      document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.preventDefault();
-          document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
-          document.getElementById(btn.dataset.tab).classList.add('active');
-        });
-      });
-    });
-  </script>
+  <script src="/js/worker.js" defer></script>
 </body>
 </html>

@@ -2,17 +2,15 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Cashier</title>
+  <title>Кассир | Magazin ERP</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;"></div>
-
   <div class="topbar">
     <div class="brand">🧾 Рабочее место кассира</div>
     <button class="burger" id="burgerBtn">☰</button>
     <nav id="mainNav">
-      <a href="#" class="btn" data-tab="search">Поиск</a>
+      <a href="#" class="btn active" data-tab="search">Поиск</a>
       <a href="#" class="btn" data-tab="cart">Чек</a>
       <a href="#" class="btn" data-tab="returns">Возвраты</a>
       <a href="#" class="btn" data-tab="shift">Смена</a>
@@ -20,43 +18,21 @@
     </nav>
   </div>
 
-  <div class="container">
-    <!-- Поиск -->
+  <main class="container">
     <section id="search" class="tab-content active">
       <h2>Поиск товара</h2>
       <input type="text" id="searchBox" placeholder="Введите название товара">
       <input type="text" id="barcodeBox" placeholder="Сканируйте штрих‑код">
-      <select id="categoryFilter">
-        <option value="">Все категории</option>
-        <option value="food">Продукты</option>
-        <option value="tech">Техника</option>
-      </select>
       <table class="table">
-        <thead>
-          <tr>
-            <th>Название</th>
-            <th>Кол-во</th>
-            <th>Цена</th>
-            <th>Действие</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Название</th><th>Кол-во</th><th>Цена</th><th></th></tr></thead>
         <tbody id="searchResults"></tbody>
       </table>
     </section>
 
-    <!-- Чек -->
     <section id="cart" class="tab-content">
       <h2>Чек</h2>
       <table class="table">
-        <thead>
-          <tr>
-            <th>Товар</th>
-            <th>Кол-во</th>
-            <th>Цена</th>
-            <th>Сумма</th>
-            <th></th>
-          </tr>
-        </thead>
+        <thead><tr><th>Товар</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><th></th></tr></thead>
         <tbody id="cartItems"></tbody>
       </table>
       <div class="cart-actions">
@@ -73,36 +49,25 @@
       <button id="printReceipt" class="btn">🧾 Пробить чек</button>
     </section>
 
-    <!-- Возвраты -->
     <section id="returns" class="tab-content">
       <h2>Возврат по чеку</h2>
       <input type="text" id="receiptNumber" placeholder="Номер чека">
       <button class="btn" id="loadReceipt">Загрузить чек</button>
-      <table class="table" style="margin-top:10px">
-        <thead>
-          <tr>
-            <th>Товар</th>
-            <th>Куплено</th>
-            <th>К возврату</th>
-            <th>Цена</th>
-            <th>Сумма</th>
-            <th></th>
-          </tr>
-        </thead>
+      <table class="table">
+        <thead><tr><th>Товар</th><th>Куплено</th><th>К возврату</th><th>Цена</th><th>Сумма</th><th></th></tr></thead>
         <tbody id="returnItems"></tbody>
       </table>
       <div class="total">Итого к возврату: <span id="returnTotal">0</span> сом</div>
       <button class="btn" id="submitReturn">🔁 Провести возврат</button>
     </section>
 
-    <!-- Смена -->
     <section id="shift" class="tab-content">
       <h2>Смена</h2>
-      <button id="openShift">Открыть смену</button>
-      <button id="closeShift">Закрыть смену</button>
-      <div id="shiftResult" style="margin-top:10px;font-size:14px;"></div>
+      <button id="openShift" class="btn">Открыть смену</button>
+      <button id="closeShift" class="btn">Закрыть смену</button>
+      <div id="shiftResult"></div>
     </section>
-  </div>
+  </main>
 
   <script src="/js/cashier.js" defer></script>
 </body>

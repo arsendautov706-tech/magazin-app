@@ -22,9 +22,9 @@
   </section>
 
   <div class="form-container">
-    <form id="loginForm" class="auth-form">
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Пароль" required>
+    <form id="loginForm" class="auth-form" method="post" action="/api/login">
+      <input type="email" id="email" name="email" placeholder="Email" required>
+      <input type="password" id="password" name="password" placeholder="Пароль" required>
       <button type="submit" class="btn">Войти</button>
     </form>
     <div id="msg" class="form-msg"></div>

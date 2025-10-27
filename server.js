@@ -21,6 +21,7 @@ pool.query('SELECT current_database(), current_schema()', (err, result) => {
   }
 });
 
+app.use(express.static("public"));
 
 const sessionStore = new pgSession({ pool });
 
