@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const burgerBtn = document.getElementById('burgerBtn');
   const nav = document.getElementById('mainNav');
   burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
- nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
 
   document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', e => {
@@ -55,8 +55,8 @@ document.getElementById('clientSearch')?.addEventListener('input', loadClients);
 document.getElementById('segmentFilter')?.addEventListener('change', loadClients);
 
 async function loadClients() {
-  const q = document.getElementById('clientSearch').value.trim();
-  const seg = document.getElementById('segmentFilter').value;
+  const q = document.getElementById('clientSearch')?.value.trim() || '';
+  const seg = document.getElementById('segmentFilter')?.value || '';
   const res = await fetch(`/crm/clients?q=${encodeURIComponent(q)}&segment=${seg}`);
   const data = await res.json();
   if (!data.success) return;
@@ -80,28 +80,7 @@ async function loadClients() {
   });
 }
 
-async function saveClient() {
-  const name = document.getElementById('cName').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const email = document.getElementById('cEmail').value.trim();
-  const segment = document.getElementById('cSegment').value;
-  if (!name) return alert('Укажите имя');
-
-  const res = await fetch('/crm/clients/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone, email, segment })
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('clientModal').style.display = 'none';
-    loadClients();
-  } else {
-    alert('Ошибка: ' + data.message);
-  }
-}
-
-async function editClient(id) {
+aasync function editClient(id) {
   const name = prompt('Новое имя:');
   if (!name) return;
   const phone = prompt('Новый телефон:');
@@ -112,16 +91,6 @@ async function editClient(id) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, name, phone, email, segment })
-  });
-  loadClients();
-}
-
-async function adjustBonus(id) {
-  const delta = parseInt(prompt('Изменение бонусов:') || '0');
-  await fetch('/crm/clients/bonus', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, delta })
   });
   loadClients();
 }
