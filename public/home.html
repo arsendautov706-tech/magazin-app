@@ -2,89 +2,102 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <title>Magazin ERP</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <style>
-    /* Анимация для плавного появления текста */
-    .info-box {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      min-height: 60px;
-      padding: 10px;
-    }
-    .info-box.fade-in {
-      opacity: 1;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Главная — ERP для бизнеса</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">Magazin ERP</div>
-    <nav>
-      <ul>
-        <li><a href="#" class="btn" data-tab="features">Возможности</a></li>
-        <li><a href="#" class="btn" data-tab="benefits">Кому выгодно</a></li>
-        <li><a href="#" class="btn" data-tab="advantages">Преимущества</a></li>
-        <li><a href="#" class="btn" data-tab="reviews">Отзывы</a></li>
-        <a href="/register.html" class="btn btn-secondary">Регистрация</a>
-
-      </ul>
-    </nav>
-    <div class="auth-buttons">
-      <a href="/login" class="btn-secondary">Войти</a>
-      <a href="/register" class="btn">Регистрация</a>
+  <!-- Хедер -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">МойБизнес</div>
+      <nav class="nav">
+        <a href="#features">Возможности</a>
+        <a href="#audience">Кому выгодно</a>
+        <a href="#benefits">Преимущества</a>
+        <a href="#testimonials">Отзывы</a>
+      </nav>
+      <div class="header-cta">
+        <a class="btn btn-outline" href="/login">Войти</a>
+        <a class="btn btn-primary" href="/signup">Регистрация</a>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <!-- Возможности -->
-    <section id="features" class="tab-content">
-      <div class="btn-group">
-        <button class="chip-btn" data-type="feature" data-key="stock">Учёт товаров и складские операции</button>
-        <button class="chip-btn" data-type="feature" data-key="crm">CRM для работы с клиентами</button>
-        <button class="chip-btn" data-type="feature" data-key="finance">Финансовый учёт и отчёты</button>
-        <button class="chip-btn" data-type="feature" data-key="marketplaces">Интеграция с маркетплейсами</button>
+  <!-- Hero -->
+  <section class="hero reveal">
+    <div class="container hero-inner">
+      <h1>Облачная ERP для вашего бизнеса</h1>
+      <p>Продажи, закупки, учет, финансы, клиенты и поставщики — всё в одной системе.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="/signup">Попробовать прямо сейчас</a>
+        <a class="btn btn-link" href="#features">Смотреть возможности</a>
       </div>
-      <div id="feature-detail" class="info-box"></div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Кому выгодно -->
-    <section id="benefits" class="tab-content">
-      <div class="btn-group">
-        <button class="chip-btn" data-type="benefit" data-key="retail">🏬 Розничной торговле</button>
-        <button class="chip-btn" data-type="benefit" data-key="wholesale">📦 Оптовой торговле</button>
-        <button class="chip-btn" data-type="benefit" data-key="online">🛒 Онлайн‑торговле</button>
-        <button class="chip-btn" data-type="benefit" data-key="manufacturing">🏭 Производству</button>
+  <!-- Возможности -->
+  <section id="features" class="section reveal">
+    <div class="container">
+      <h2>Возможности</h2>
+      <div class="cards grid-2">
+        <article class="card"><h3>Учёт товаров и складские операции</h3><p>Управление товарами и ценами. Планирование закупок и контроль остатков. Резервы, модификации, инвентаризации.</p></article>
+        <article class="card"><h3>CRM для работы с клиентами</h3><p>История покупок, сегментация базы клиентов, бонусные программы лояльности. Телефония и рассылки.</p></article>
+        <article class="card"><h3>Финансовый учёт и отчёты</h3><p>Контроль взаиморасчётов, движение денежных средств, прибыль и убытки. Автоматическая генерация отчётов.</p></article>
+        <article class="card"><h3>Интеграция с маркетплейсами</h3><p>Ozon, Wildberries, Яндекс Маркет и другие. Автоматизация FBO/FBS, контроль прибыли с учётом комиссий.</p></article>
       </div>
-      <div id="benefit-detail" class="info-box"></div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Преимущества -->
-    <section id="advantages" class="tab-content">
-      <div class="btn-group">
-        <button class="chip-btn" data-type="advantage" data-key="cloud">☁️ Работа из облака</button>
-        <button class="chip-btn" data-type="advantage" data-key="integrations">🔗 Интеграции</button>
-        <button class="chip-btn" data-type="advantage" data-key="analytics">📊 Отчёты и аналитика</button>
-        <button class="chip-btn" data-type="advantage" data-key="security">🔒 Безопасность</button>
+  <!-- Кому выгодно -->
+  <section id="audience" class="section alt reveal">
+    <div class="container">
+      <h2>Кому выгодно</h2>
+      <div class="cards grid-4">
+        <article class="card"><h3>Розничной торговле</h3><p>Касса, маркировка, остатки, акции и лояльность.</p></article>
+        <article class="card"><h3>Оптовой торговле</h3><p>Прайсы, резервы, контрагенты, счета и накладные.</p></article>
+        <article class="card"><h3>Онлайн‑торговле</h3><p>Интеграции с маркетплейсами, CMS и платёжами.</p></article>
+        <article class="card"><h3>Производству</h3><p>Техкарты, списания, партии и прослеживаемость.</p></article>
       </div>
-      <div id="advantage-detail" class="info-box"></div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Отзывы -->
-    <section id="reviews" class="tab-content">
-      <div class="review-grid">
-        <div class="review-card">«Magazin ERP помог нам автоматизировать склад и продажи.» — Иван</div>
-        <div class="review-card">«Очень удобно: интеграция с маркетплейсами и отчёты.» — Анна</div>
-        <div class="review-card">«Система проста и надёжна.» — Сергей</div>
+  <!-- Преимущества -->
+  <section id="benefits" class="section reveal">
+    <div class="container">
+      <h2>Преимущества</h2>
+      <div class="benefits">
+        <div class="benefit"><strong>Поддержка 24/7:</strong> чат, телефон и почта.</div>
+        <div class="benefit"><strong>Доступно:</strong> смартфон, планшет, компьютер.</div>
+        <div class="benefit"><strong>Просто:</strong> старт за 15 минут.</div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <footer class="footer">
-    <p>© 2015–2025 Magazin ERP | Текущая версия: 10.25</p>
-    <p><a href="/privacy.html">Политика конфиденциальности</a> | <a href="/contacts.html">Контакты</a></p>
-  </footer>
+  <!-- Отзывы -->
+  <section id="testimonials" class="section alt reveal">
+    <div class="container">
+      <h2>Отзывы</h2>
+      <div class="cards grid-3">
+        <article class="card quote"><p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.”</p><div class="author">Татьяна Матюшина — MATU</div></article>
+        <article class="card quote"><p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.”</p><div class="author">Александр Авакян — R.A.W. LIFE</div></article>
+        <article class="card quote"><p>“Навёл порядок на складах. Видим остатки, продажи и деньги.”</p><div class="author">Светлана Михалева — Eggsellent</div></article>
+      </div>
+    </div>
+  </section>
 
-  <script src="/js/home.js"></script>
+  <!-- Регистрация -->
+  <section id="signup" class="section cta reveal">
+    <div class="container cta-inner">
+      <h2>Начните бесплатно</h2>
+      <p>Складской учет, онлайн‑касса, ЕГАИС — без ограничений по времени.</p>
+      <a class="btn btn-primary btn-lg" href="/signup">Регистрация</a>
+      <a class="btn btn-outline btn-lg" href="/login">Войти</a>
+    </div>
+  </section>
+
+  <!-- Скрипт анимаций -->
+  <script src="animations.js"></script>
 </body>
 </html>
