@@ -370,3 +370,24 @@ p:hover {
   color: #007bff;
   transition: color 0.3s;
 }
+.tab-content {
+  display: none;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.tab-content.show {
+  display: block;
+}
+
+#default-text {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
