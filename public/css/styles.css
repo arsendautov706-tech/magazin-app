@@ -285,3 +285,88 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
 }
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+header {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  color: white;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  border: none;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.tab-btn:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+.tab-content {
+  max-width: 800px;
+  margin: 0 auto 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.5s ease, padding 0.3s ease;
+  padding: 0 20px;
+}
+
+.tab-content.show {
+  padding: 20px;
+  max-height: 500px;
+  opacity: 1;
+}
+
+.tab-content h2 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #eee;
+  font-size: 0.9rem;
+}
+
+p:hover {
+  color: #007bff;
+  transition: color 0.3s;
+}
