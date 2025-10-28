@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const steps = document.querySelectorAll(".step");
+  const revealElements = document.querySelectorAll(".reveal, .step, .table");
+
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -7,5 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }, { threshold: 0.2 });
-  steps.forEach(step => observer.observe(step));
+
+  revealElements.forEach(el => observer.observe(el));
 });
