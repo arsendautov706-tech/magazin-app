@@ -207,6 +207,22 @@ app.get('/crm/clients', async (req, res) => {
   }
 });
 
+app.use(express.json());
+
+
+app.post('/clients', (req, res) => {
+  const { name, phone, email } = req.body;
+
+  if (!name || !phone || !email) {
+    return res.status(400).json({ error: 'Все поля обязательны' });
+  }
+  res.status(201).json({
+    message: 'Клиент успешно добавлен',
+    client: { name, phone, email }
+  });
+});
+
+
 app.post('/crm/clients/create', async (req, res) => {
   const { full_name, phone, email, segment } = req.body;
   if (!full_name) {
