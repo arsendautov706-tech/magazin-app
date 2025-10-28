@@ -1,49 +1,104 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>ERP для бизнеса</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Главная — ERP для бизнеса</title>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <header>
-    <h1>Облачная ERP‑система для вашего бизнеса</h1>
-    <p class="subtitle">Продажи, учёт, финансы, клиенты и поставщики — всё в одной системе</p>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">МойБизнес</div>
+      <nav class="nav">
+        <a href="#features">Возможности</a>
+        <a href="#audience">Кому выгодно</a>
+        <a href="#benefits">Преимущества</a>
+        <a href="#testimonials">Отзывы</a>
+      </nav>
+      <div class="header-cta">
+        <a class="btn btn-outline" href="/login">Войти</a>
+        <a class="btn btn-primary" href="/register.html">Регистрация</a>
+      </div>
+    </div>
   </header>
 
-  <nav class="tabs">
-    <button class="tab-btn" data-target="sales">Продажи</button>
-    <button class="tab-btn" data-target="accounting">Учёт</button>
-    <button class="tab-btn" data-target="finance">Финансы</button>
-    <button class="tab-btn" data-target="clients">Клиенты</button>
-  </nav>
+  <section class="hero reveal">
+    <div class="container hero-inner">
+      <h1>Облачная ERP для вашего бизнеса</h1>
+      <p>Продажи, закупки, учет, финансы, клиенты и поставщики — всё в одной системе.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="/register.html">Попробовать прямо сейчас</a>
+        <a class="btn btn-link" href="#features">Смотреть возможности</a>
+      </div>
+    </div>
+  </section>
 
-  <main>
-    <section id="sales" class="tab-content">
-      <h2>Продажи</h2>
-      <p>Управляйте воронкой продаж, отслеживайте сделки и формируйте отчёты в реальном времени.</p>
-    </section>
+  <section id="testimonials" class="section reveal">
+    <div class="container steps">
+      <div class="step card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Отзывы</h3>
+          <p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.” — Татьяна Матюшина</p>
+          <p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.” — Александр Авакян</p>
+          <p>“Навёл порядок на складах. Видим остатки, продажи и деньги.” — Светлана Михалева</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section id="accounting" class="tab-content">
-      <h2>Учёт</h2>
-      <p>Автоматизированный складской и бухгалтерский учёт, минимизация ошибок и прозрачность операций.</p>
-    </section>
+  <section id="benefits" class="section reveal">
+    <div class="container steps">
+      <div class="step card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Преимущества</h3>
+          <p><strong>Поддержка 24/7:</strong> чат, телефон и почта.</p>
+          <p><strong>Доступно:</strong> смартфон, планшет, компьютер.</p>
+          <p><strong>Просто:</strong> старт за 15 минут.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section id="finance" class="tab-content">
-      <h2>Финансы</h2>
-      <p>Контролируйте расходы и доходы, стройте бюджеты и прогнозы для уверенного роста компании.</p>
-    </section>
+  <section id="audience" class="section reveal">
+    <div class="container steps">
+      <div class="step card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Кому выгодно</h3>
+          <p>Розничной торговле: касса, маркировка, остатки, акции и лояльность.</p>
+          <p>Оптовой торговле: прайсы, резервы, контрагенты, счета и накладные.</p>
+          <p>Онлайн‑торговле: интеграции с маркетплейсами, CMS и платёжами.</p>
+          <p>Производству: техкарты, списания, партии и прослеживаемость.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section id="clients" class="tab-content">
-      <h2>Клиенты</h2>
-      <p>CRM‑модуль для управления клиентами, сегментации и персонализированных коммуникаций.</p>
-    </section>
-  </main>
+  <section id="features" class="section reveal">
+    <div class="container steps">
+      <div class="step card">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>Возможности</h3>
+          <p>Учёт товаров и складские операции: управление товарами и ценами, планирование закупок и контроль остатков.</p>
+          <p>CRM для работы с клиентами: история покупок, сегментация базы клиентов, бонусные программы лояльности.</p>
+          <p>Финансовый учёт и отчёты: контроль взаиморасчётов, движение денежных средств, прибыль и убытки.</p>
+          <p>Интеграция с маркетплейсами: Ozon, Wildberries, Яндекс Маркет и другие.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <footer>
-    <p>© 2025 ERP Business Suite • Все права защищены</p>
-  </footer>
+  <section id="footer-info" class="section cta reveal">
+    <div class="container cta-inner">
+      <a class="btn btn-primary btn-lg" href="/privacy.html">Политика конфиденциальности</a>
+      <a class="btn btn-outline btn-lg" href="/contacts.html">Контакты</a>
+    </div>
+  </section>
 
-  <script src="home.js"></script>
+ <script src="/js/home.js"></script>
 </body>
 </html>
