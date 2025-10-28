@@ -5,6 +5,37 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Главная — ERP для бизнеса</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #007bff;
+      color: #fff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+    }
+    .step-content h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .step-content p {
+      margin: 5px 0 0;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -35,35 +66,44 @@
   </section>
 
   <section id="accordion-section" class="section reveal">
-    <div class="container">
-      <button class="accordion">Отзывы</button>
-      <div class="panel">
-        <p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.” — Татьяна Матюшина</p>
-        <p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.” — Александр Авакян</p>
-        <p>“Навёл порядок на складах. Видим остатки, продажи и деньги.” — Светлана Михалева</p>
+    <div class="container steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Отзывы</h3>
+          <p>“Он помог упорядочить работу, наладить учет, а теперь и маркировку.” — Татьяна Матюшина</p>
+          <p>“Лаконично, надежно, все работает как часы. Заказы на производство, интеграции с банками.” — Александр Авакян</p>
+          <p>“Навёл порядок на складах. Видим остатки, продажи и деньги.” — Светлана Михалева</p>
+        </div>
       </div>
-
-      <button class="accordion">Преимущества</button>
-      <div class="panel">
-        <p><strong>Поддержка 24/7:</strong> чат, телефон и почта.</p>
-        <p><strong>Доступно:</strong> смартфон, планшет, компьютер.</p>
-        <p><strong>Просто:</strong> старт за 15 минут.</p>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Преимущества</h3>
+          <p><strong>Поддержка 24/7:</strong> чат, телефон и почта.</p>
+          <p><strong>Доступно:</strong> смартфон, планшет, компьютер.</p>
+          <p><strong>Просто:</strong> старт за 15 минут.</p>
+        </div>
       </div>
-
-      <button class="accordion">Кому выгодно</button>
-      <div class="panel">
-        <p>Розничной торговле: касса, маркировка, остатки, акции и лояльность.</p>
-        <p>Оптовой торговле: прайсы, резервы, контрагенты, счета и накладные.</p>
-        <p>Онлайн‑торговле: интеграции с маркетплейсами, CMS и платёжами.</p>
-        <p>Производству: техкарты, списания, партии и прослеживаемость.</p>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Кому выгодно</h3>
+          <p>Розничной торговле: касса, маркировка, остатки, акции и лояльность.</p>
+          <p>Оптовой торговле: прайсы, резервы, контрагенты, счета и накладные.</p>
+          <p>Онлайн‑торговле: интеграции с маркетплейсами, CMS и платёжами.</p>
+          <p>Производству: техкарты, списания, партии и прослеживаемость.</p>
+        </div>
       </div>
-
-      <button class="accordion">Возможности</button>
-      <div class="panel">
-        <p>Учёт товаров и складские операции: управление товарами и ценами, планирование закупок и контроль остатков.</p>
-        <p>CRM для работы с клиентами: история покупок, сегментация базы клиентов, бонусные программы лояльности.</p>
-        <p>Финансовый учёт и отчёты: контроль взаиморасчётов, движение денежных средств, прибыль и убытки.</p>
-        <p>Интеграция с маркетплейсами: Ozon, Wildberries, Яндекс Маркет и другие.</p>
+      <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>Возможности</h3>
+          <p>Учёт товаров и складские операции: управление товарами и ценами, планирование закупок и контроль остатков.</p>
+          <p>CRM для работы с клиентами: история покупок, сегментация базы клиентов, бонусные программы лояльности.</p>
+          <p>Финансовый учёт и отчёты: контроль взаиморасчётов, движение денежных средств, прибыль и убытки.</p>
+          <p>Интеграция с маркетплейсами: Ozon, Wildberries, Яндекс Маркет и другие.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -76,5 +116,7 @@
   </section>
 
   <script src="/js/accordion.js"></script>
+  <script src="/js/steps.js"></script>
+
 </body>
 </html>
