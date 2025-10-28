@@ -38,7 +38,6 @@ app.use(session({
   }
 }));
 
-
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
   fs.mkdirSync(reportsDir);
@@ -50,19 +49,14 @@ if (!fs.existsSync(reportsDir)) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'supersecret',
-  resave: false,
-  saveUninitialized: false
-}));
-
 app.use('/reports', express.static(reportsDir));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const cspDirectives = {
   defaultSrc: ["'self'"],
   scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'data:'", "'blob:'"],
-  styleSrc: ["'self'", "'unsafe-inline'"]
+  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"]
 };
 
 app.use(helmet({
@@ -70,17 +64,6 @@ app.use(helmet({
 }));
 
 console.log('🚀 Express и middleware инициализированы');
-
-const isDev = process.env.NODE_ENV !== 'production';
-const cspHeader = isDev
-  ? "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-  : "default-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';";
-
-app.use((req, res, next) => {
-  res.removeHeader("Content-Security-Policy");
-  res.setHeader("Content-Security-Policy", cspHeader);
-  next();
-});
 
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
   res.removeHeader("Content-Security-Policy");
@@ -96,7 +79,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
-// Админ
 app.get('/admin', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.redirect('/login.html');
@@ -104,7 +86,6 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Работник склада
 app.get('/worker', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'worker') {
     return res.redirect('/login.html');
@@ -112,7 +93,6 @@ app.get('/worker', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'worker.html'));
 });
 
-// Кассир (если есть отдельная панель)
 app.get('/cashier', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'cashier') {
     return res.redirect('/login.html');
@@ -182,13 +162,6 @@ function generateReport(filename, cashier, items) {
 }
 
 const bcrypt = require('bcrypt');
-
-app.get('/cashier', (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'cashier') {
-    return res.redirect('/login.html');
-  }
-  res.sendFile(path.join(__dirname, 'public', 'cashier.html'));
-});
 const inventoryRouter = require('./routes/inventory');
 app.use('/inventory', inventoryRouter);
 
@@ -210,7 +183,6 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Неверный пароль' });
     }
 
-    // сохраняем пользователя в сессии
     req.session.user = {
       id: user.id,
       username: user.username,
@@ -218,15 +190,13 @@ app.post('/login', async (req, res) => {
       role: user.role
     };
 
-    // ✅ всегда возвращаем JSON, без res.redirect
     res.json({ success: true, user: req.session.user });
-
   } catch (err) {
     console.error('Ошибка при входе:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
-// Получение клиентов
+
 app.get('/crm/clients', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM public.clients ORDER BY client_id DESC');
@@ -237,10 +207,11 @@ app.get('/crm/clients', async (req, res) => {
   }
 });
 
-// Создание клиента
 app.post('/crm/clients/create', async (req, res) => {
   const { full_name, phone, email, segment } = req.body;
-  if (!full_name) return res.json({ success: false, message: 'ФИО обязательно' });
+  if (!full_name) {
+    return res.json({ success: false, message: 'ФИО обязательно' });
+  }
 
   try {
     const result = await pool.query(
@@ -256,81 +227,6 @@ app.post('/crm/clients/create', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
-
-// Обновление клиента
-app.post('/crm/clients/update', async (req, res) => {
-  const { client_id, full_name, phone, email, segment } = req.body;
-  if (!client_id || !full_name) {
-    return res.json({ success: false, message: 'ID и ФИО обязательны' });
-  }
-
-  try {
-    const result = await pool.query(
-      `UPDATE public.clients
-       SET full_name = $1, phone = $2, email = $3, segment = $4
-       WHERE client_id = $5
-       RETURNING *`,
-      [full_name, phone, email, segment, client_id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.json({ success: false, message: 'Клиент не найден' });
-    }
-
-    res.json({ success: true, client: result.rows[0] });
-  } catch (err) {
-    console.error('Ошибка при обновлении клиента:', err);
-    res.json({ success: false, message: 'Ошибка обновления' });
-  }
-});
-
-// Обновление бонусов
-app.post('/crm/clients/bonus', async (req, res) => {
-  const { client_id, delta } = req.body;
-  if (!client_id || isNaN(delta)) {
-    return res.json({ success: false, message: 'Неверные данные' });
-  }
-
-  try {
-    const result = await pool.query(
-      `UPDATE public.clients
-       SET bonus_points = COALESCE(bonus_points, 0) + $1
-       WHERE client_id = $2
-       RETURNING *`,
-      [delta, client_id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.json({ success: false, message: 'Клиент не найден' });
-    }
-
-    res.json({ success: true, client: result.rows[0] });
-  } catch (err) {
-    console.error('Ошибка при обновлении бонусов:', err);
-    res.json({ success: false, message: 'Ошибка бонуса' });
-  }
-});
-// Получение одного клиента по ID
-app.get('/crm/clients/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const result = await pool.query(
-      'SELECT * FROM public.clients WHERE client_id = $1',
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Клиент не найден' });
-    }
-
-    res.json({ success: true, client: result.rows[0] });
-  } catch (err) {
-    console.error('Ошибка при поиске клиента по ID:', err);
-    res.status(500).json({ success: false, message: 'Ошибка сервера' });
-  }
-});
-
 // Универсальный поиск по имени, телефону или email
 app.get('/crm/clients/search', async (req, res) => {
   try {
