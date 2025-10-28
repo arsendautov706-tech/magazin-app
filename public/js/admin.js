@@ -49,11 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/clients")
       if (res.ok) {
         const data = await res.json()
+        const clients = data.success ? data.clients : data
         clientsTable.innerHTML = ""
-        data.forEach(c => {
+        clients.forEach(c => {
           const row = document.createElement("tr")
           row.innerHTML = `
-            <td>${c.name}</td>
+            <td>${c.full_name}</td>
             <td>${c.phone}</td>
             <td>${c.email}</td>
             <td>${c.segment || ""}</td>
@@ -71,13 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (saveClient) {
     saveClient.addEventListener("click", async () => {
-      const name = document.getElementById("cName").value.trim()
+      const full_name = document.getElementById("cName").value.trim()
       const phone = document.getElementById("cPhone").value.trim()
       const email = document.getElementById("cEmail").value.trim()
       const segment = document.getElementById("cSegment").value
 
-      if (!name || !phone || !email) {
-        alert("Имя, телефон и email обязательны")
+      if (!full_name || !phone || !email) {
+        alert("ФИО, телефон и email обязательны")
         return
       }
 
@@ -85,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("/clients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, email, segment })
+          body: JSON.stringify({ full_name, phone, email, segment })
         })
         if (res.ok) {
           await loadClients()
