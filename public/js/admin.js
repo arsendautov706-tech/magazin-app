@@ -1,128 +1,85 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const sessionRes = await fetch('/session');
-  const sessionData = await sessionRes.json();
-  if (!sessionData.success || sessionData.user.role !== 'admin') {
-    return (window.location.href = '/login.html');
+document.addEventListener("DOMContentLoaded", () => {
+  const tabs = document.querySelectorAll(".tab-content");
+  const navBtns = document.querySelectorAll("#mainNav .btn");
+  const burgerBtn = document.getElementById("burgerBtn");
+  const mainNav = document.getElementById("mainNav");
+
+  function showTab(id) {
+    tabs.forEach(tab => tab.classList.remove("active"));
+    const target = document.getElementById(id);
+    if (target) target.classList.add("active");
+    navBtns.forEach(btn => btn.classList.remove("active"));
+    const activeBtn = document.querySelector(`#mainNav .btn[data-tab="${id}"]`);
+    if (activeBtn) activeBtn.classList.add("active");
   }
 
-  const burgerBtn = document.getElementById('burgerBtn');
-  const nav = document.getElementById('mainNav');
-  burgerBtn.addEventListener('click', () => nav.classList.toggle('active'));
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('active')));
-
-  document.querySelectorAll('nav .btn[data-tab]').forEach(btn => {
-    btn.addEventListener('click', e => {
+  navBtns.forEach(btn => {
+    btn.addEventListener("click", e => {
       e.preventDefault();
-      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('nav .btn[data-tab]').forEach(b => b.classList.remove('active'));
-      document.getElementById(btn.dataset.tab).classList.add('active');
-      btn.classList.add('active');
-      if (btn.dataset.tab === 'reports') loadReports();
-      if (btn.dataset.tab === 'inventory') loadInventory();
-      if (btn.dataset.tab === 'notifications') loadNotifications();
-      if (btn.dataset.tab === 'crm') loadClients();
+      const id = btn.dataset.tab;
+      if (id) showTab(id);
     });
   });
 
-  loadReports();
-});
-
-async function loadReports() {
-  const tbody = document.getElementById('reportsList');
-  tbody.innerHTML = '<tr><td colspan="3">Нет данных</td></tr>';
-}
-
-async function loadInventory() {
-  const tbody = document.getElementById('inventoryTable');
-  tbody.innerHTML = '<tr><td colspan="4">Нет данных</td></tr>';
-}
-
-async function loadNotifications() {
-  const box = document.getElementById('notificationsList');
-  box.textContent = 'Нет новых уведомлений';
-}
-
-document.getElementById('addClientBtn')?.addEventListener('click', () => {
-  document.getElementById('clientModal').style.display = 'block';
-});
-
-document.getElementById('closeClientModal')?.addEventListener('click', () => {
-  document.getElementById('clientModal').style.display = 'none';
-});
-
-document.getElementById('saveClient')?.addEventListener('click', saveClient);
-document.getElementById('clientSearch')?.addEventListener('input', loadClients);
-document.getElementById('segmentFilter')?.addEventListener('change', loadClients);
-
-async function loadClients() {
-  const q = document.getElementById('clientSearch')?.value.trim() || '';
-  const seg = document.getElementById('segmentFilter')?.value || '';
-  const res = await fetch(`/crm/clients?q=${encodeURIComponent(q)}&segment=${seg}`);
-  const data = await res.json();
-  if (!data.success) return;
-
-  const tbody = document.getElementById('clientsTable');
-  tbody.innerHTML = '';
-  data.clients.forEach(c => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.name}</td>
-      <td>${c.phone || '-'}</td>
-      <td>${c.email || '-'}</td>
-      <td>${c.segment || '-'}</td>
-      <td>${c.bonus || 0}</td>
-      <td>${c.purchases || 0}</td>
-      <td>
-        <button class="btn" onclick="editClient(${c.id})">✏️</button>
-        <button class="btn" onclick="adjustBonus(${c.id})">🎁</button>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-async function saveClient() {
-  const name = document.getElementById('cName').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const email = document.getElementById('cEmail').value.trim();
-  const segment = document.getElementById('cSegment').value;
-  if (!name) return alert('Укажите имя');
-
-  const res = await fetch('/crm/clients/create', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone, email, segment })
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById('clientModal').style.display = 'none';
-    loadClients();
-  } else {
-    alert('Ошибка: ' + data.message);
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", () => {
+      mainNav.classList.toggle("open");
+    });
   }
-}
 
-async function editClient(id) {
-  const name = prompt('Новое имя:');
-  if (!name) return;
-  const phone = prompt('Новый телефон:');
-  const email = prompt('Новый email:');
-  const segment = prompt('Сегмент:');
+  const addClientBtn = document.getElementById("addClientBtn");
+  const clientModal = document.getElementById("clientModal");
+  const closeClientModal = document.getElementById("closeClientModal");
+  const saveClient = document.getElementById("saveClient");
+  const clientsTable = document.getElementById("clientsTable");
 
-  await fetch('/crm/clients/update', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, name, phone, email, segment })
-  });
-  loadClients();
-}
+  function openModal() {
+    clientModal.style.display = "flex";
+  }
+  function closeModal() {
+    clientModal.style.display = "none";
+  }
 
-async function adjustBonus(id) {
-  const delta = parseInt(prompt('Изменение бонусов:') || '0');
-  await fetch('/crm/clients/bonus', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, delta })
-  });
-  loadClients();
-}
+  if (addClientBtn) addClientBtn.addEventListener("click", openModal);
+  if (closeClientModal) closeClientModal.addEventListener("click", closeModal);
+
+  if (saveClient) {
+    saveClient.addEventListener("click", async () => {
+      const name = document.getElementById("cName").value.trim();
+      const phone = document.getElementById("cPhone").value.trim();
+      const email = document.getElementById("cEmail").value.trim();
+      const segment = document.getElementById("cSegment").value;
+
+      if (!name) {
+        alert("Имя обязательно");
+        return;
+      }
+
+      try {
+        const res = await fetch("/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, email, segment })
+        });
+        if (res.ok) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${name}</td>
+            <td>${phone}</td>
+            <td>${email}</td>
+            <td>${segment}</td>
+            <td>0</td>
+            <td>0</td>
+            <td></td>
+          `;
+          clientsTable.appendChild(row);
+          closeModal();
+        } else {
+          alert("Ошибка при сохранении клиента");
+        }
+      } catch (e) {
+        console.error("Ошибка запроса", e);
+      }
+    });
+  }
+});
