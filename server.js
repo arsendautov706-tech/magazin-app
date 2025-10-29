@@ -5,6 +5,7 @@ const pool = require('./db');
 const initDatabase = require('./init-db');
 const path = require('path');
 const fs = require('fs');
+const helmet = require('helmet');
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
@@ -42,15 +43,6 @@ pool.query('SELECT current_database(), current_schema()', (err, result) => {
 });
 
 app.use(express.static('public'));
-
-
-if (!fs.existsSync(reportsDir)) {
-  fs.mkdirSync(reportsDir);
-}
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 app.use('/reports', express.static(reportsDir));
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -5,9 +5,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-module.exports = pool
-
-// Проверка подключения
 pool.connect()
   .then(client => {
     console.log('✅ Подключение к PostgreSQL успешно')
@@ -16,12 +13,10 @@ pool.connect()
   })
   .catch(err => console.error('❌ Ошибка подключения к PostgreSQL:', err))
 
-// Ловим notice-сообщения от PostgreSQL
 pool.on('connect', client => {
   client.on('notice', msg => console.log('⚠️ notice:', msg))
 })
 
-// Логируем все SQL-запросы
 const origQuery = pool.query.bind(pool)
 pool.query = (...args) => {
   console.log("📌 Executing SQL:", args[0])
