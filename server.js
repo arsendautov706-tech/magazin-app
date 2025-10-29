@@ -4,55 +4,13 @@ const pgSession = require('connect-pg-simple')(session);
 const pool = require('./db');
 const initDatabase = require('./init-db');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(session({
-  store: new pgSession({
-    pool: pool,
-    tableName: 'session'
-  }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false }
-}));
-
-initDatabase(pool);
-pool.query('SELECT current_database(), current_schema()', (err, result) => {
-  if (err) {
-    console.error('Ошибка при проверке базы:', err);
-  } else {
-    console.log('📌 Подключено к базе:', result.rows[0]);
-  }
-});
-
-
-initDatabase(pool);
-pool.query('SELECT current_database(), current_schema()', (err, result) => {
-  if (err) {
-    console.error('Ошибка при проверке базы:', err);
-  } else {
-    console.log('📌 Подключено к базе:', result.rows[0]);
-  }
-});
-
-app.use(session({
-  store: new pgSession({
-    pool: pool,
-    tableName: 'session'
-  }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false }
-}))
-
-app.use(express.static('public'));
 
 const sessionStore = new pgSession({ pool });
 
@@ -68,6 +26,23 @@ app.use(session({
     sameSite: 'lax'
   }
 }));
+
+initDatabase(pool);
+pool.query('SELECT current_database(), current_schema()', (err, result) => {
+  if (err) {
+    console.error('Ошибка при проверке базы:', err);
+  } else {
+    console.log('📌 Подключено к базе:', result.rows[0]);
+  }
+});
+
+app.use(express.static('public'));
+
+const reportsDir = path.join(__dirname, 'reports');
+if (!fs.existsSync(reportsDir)) {
+  fs.mkdirSync(reportsDir);
+}
+
 
 const reportsDir = path.join(__dirname, 'reports');
 if (!fs.existsSync(reportsDir)) {
