@@ -34,36 +34,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveClient = document.getElementById("saveClient")
   const clientsTable = document.getElementById("clientsTable")
 
-  function openModal() {
-    clientModal.style.display = "flex"
-  }
-  function closeModal() {
-    clientModal.style.display = "none"
-  }
+  const searchBtn = document.getElementById("searchClientBtn")
+  const searchName = document.getElementById("searchName")
+  const searchPhone = document.getElementById("searchPhone")
+  const searchEmail = document.getElementById("searchEmail")
+
+  function openModal() { clientModal.style.display = "flex" }
+  function closeModal() { clientModal.style.display = "none" }
 
   if (addClientBtn) addClientBtn.addEventListener("click", openModal)
   if (closeClientModal) closeClientModal.addEventListener("click", closeModal)
+
+  async function renderClients(clients) {
+    clientsTable.innerHTML = ""
+    clients.forEach(c => {
+      const row = document.createElement("tr")
+      row.innerHTML = `
+        <td>${c.full_name}</td>
+        <td>${c.phone}</td>
+        <td>${c.email}</td>
+        <td>${c.segment || ""}</td>
+        <td>${c.bonuses || 0}</td>
+        <td>${c.purchases || 0}</td>
+        <td></td>
+      `
+      clientsTable.appendChild(row)
+    })
+  }
 
   async function loadClients() {
     try {
       const res = await fetch("/clients")
       if (res.ok) {
         const data = await res.json()
-        const clients = data.success ? data.clients : data
-        clientsTable.innerHTML = ""
-        clients.forEach(c => {
-          const row = document.createElement("tr")
-          row.innerHTML = `
-            <td>${c.full_name}</td>
-            <td>${c.phone}</td>
-            <td>${c.email}</td>
-            <td>${c.segment || ""}</td>
-            <td>${c.bonuses || 0}</td>
-            <td>${c.purchases || 0}</td>
-            <td></td>
-          `
-          clientsTable.appendChild(row)
-        })
+        renderClients(data.success ? data.clients : [])
       }
     } catch (e) {
       console.error("Ошибка загрузки клиентов", e)
@@ -96,6 +100,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (e) {
         console.error("Ошибка запроса", e)
+      }
+    })
+  }
+
+  if (searchBtn) {
+    searchBtn.addEventListener("click", async () => {
+      const params = new URLSearchParams()
+      if (searchName.value.trim()) params.append("full_name", searchName.value.trim())
+      if (searchPhone.value.trim()) params.append("phone", searchPhone.value.trim())
+      if (searchEmail.value.trim()) params.append("email", searchEmail.value.trim())
+
+      try {
+        const res = await fetch(`/clients/search?${params.toString()}`)
+        if (res.ok) {
+          const data = await res.json()
+          renderClients(data.success ? data.clients : [])
+        }
+      } catch (e) {
+        console.error("Ошибка поиска клиентов", e)
       }
     })
   }
