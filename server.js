@@ -3,6 +3,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const pool = require('./db');
 const initDatabase = require('./init-db');
+const path = require('path');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -20,6 +21,16 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: false }
 }));
+
+initDatabase(pool);
+pool.query('SELECT current_database(), current_schema()', (err, result) => {
+  if (err) {
+    console.error('Ошибка при проверке базы:', err);
+  } else {
+    console.log('📌 Подключено к базе:', result.rows[0]);
+  }
+});
+
 
 initDatabase(pool);
 pool.query('SELECT current_database(), current_schema()', (err, result) => {

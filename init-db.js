@@ -1,7 +1,6 @@
 const pool = require('./db')
 module.exports = async function initDatabase(pool) {
   try {
-    // Users
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.users (
         id SERIAL PRIMARY KEY,
@@ -12,7 +11,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Clients
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.clients (
         id SERIAL PRIMARY KEY,
@@ -25,7 +23,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Products
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.products (
         id SERIAL PRIMARY KEY,
@@ -35,7 +32,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Inventory
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.inventory (
         id SERIAL PRIMARY KEY,
@@ -45,7 +41,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Inventory reports
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.inventory_reports (
         id SERIAL PRIMARY KEY,
@@ -55,7 +50,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Cashier reports
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.cashier_reports (
         id SERIAL PRIMARY KEY,
@@ -66,7 +60,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Sales reports
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.sales_reports (
         id SERIAL PRIMARY KEY,
@@ -76,7 +69,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Sales
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.sales (
         id SERIAL PRIMARY KEY,
@@ -86,7 +78,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Notifications
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.notifications (
         id SERIAL PRIMARY KEY,
@@ -98,7 +89,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Reports
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.reports (
         id SERIAL PRIMARY KEY,
@@ -109,7 +99,6 @@ module.exports = async function initDatabase(pool) {
       )
     `);
 
-    // Sessions
     await pool.query(`
       CREATE TABLE IF NOT EXISTS public.sessions (
         sid VARCHAR NOT NULL PRIMARY KEY,
