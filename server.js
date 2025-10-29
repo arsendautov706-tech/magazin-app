@@ -43,18 +43,9 @@ pool.query('SELECT current_database(), current_schema()', (err, result) => {
 
 app.use(express.static('public'));
 
-const reportsDir = path.join(__dirname, 'reports');
+
 if (!fs.existsSync(reportsDir)) {
   fs.mkdirSync(reportsDir);
-}
-
-
-const reportsDir = path.join(__dirname, 'reports');
-if (!fs.existsSync(reportsDir)) {
-  fs.mkdirSync(reportsDir);
-  console.log('📁 Папка reports создана');
-} else {
-  console.log('📁 Папка reports уже существует');
 }
 
 app.use(express.urlencoded({ extended: true }));
@@ -484,7 +475,6 @@ app.post('/sales/receipt', requireRole(['cashier']), async (req, res) => {
 )
 const reportId = result.rows[0].id
 const filename = `report_${cashierName}_${Date.now()}.pdf`
-const reportsDir = path.join(__dirname, 'public', 'reports')
 
 if (!fs.existsSync(reportsDir)) {
   fs.mkdirSync(reportsDir, { recursive: true })
