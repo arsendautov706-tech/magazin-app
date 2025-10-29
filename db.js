@@ -2,10 +2,13 @@ const { Pool } = require('pg')
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false   // у тебя база явно не принимает SSL
+  ssl: {
+    rejectUnauthorized: false
+  }
 })
 
 module.exports = pool
+l
 
 
 // Проверка подключения

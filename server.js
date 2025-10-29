@@ -12,6 +12,20 @@ const initDatabase = require('./init-db');
 
 const app = express();
 app.set('trust proxy', 1);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  store: new pgSession({
+    pool: pool,
+    tableName: 'session'
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}));
+
 
 initDatabase(pool);
 pool.query('SELECT current_database(), current_schema()', (err, result) => {
