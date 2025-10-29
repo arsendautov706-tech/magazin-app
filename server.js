@@ -6,6 +6,11 @@ const initDatabase = require('./init-db');
 const path = require('path');
 const fs = require('fs');
 
+const reportsDir = path.join(__dirname, 'reports');
+if (!fs.existsSync(reportsDir)) {
+  fs.mkdirSync(reportsDir);
+}
+
 const app = express();
 app.set('trust proxy', 1);
 
