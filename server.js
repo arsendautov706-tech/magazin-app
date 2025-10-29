@@ -661,8 +661,8 @@ app.get('/init-db', async (req, res) => {
   }
 })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Сервер запущен на порту ${PORT}`)
-  console.log("🚀 Сервер стартует с версией INSERT public.clients")
-})
+  console.log(`✅ Сервер запущен на порту ${PORT}`);
+});
+
