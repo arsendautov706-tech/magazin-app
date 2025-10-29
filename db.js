@@ -9,7 +9,6 @@ const pool = new Pool({
 
 module.exports = pool
 
-
 // Проверка подключения
 pool.connect()
   .then(client => {

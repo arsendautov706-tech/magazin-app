@@ -30,6 +30,17 @@ pool.query('SELECT current_database(), current_schema()', (err, result) => {
   }
 });
 
+app.use(session({
+  store: new pgSession({
+    pool: pool,
+    tableName: 'session'
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}))
+
 app.use(express.static('public'));
 
 const sessionStore = new pgSession({ pool });

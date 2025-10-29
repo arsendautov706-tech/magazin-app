@@ -1,4 +1,4 @@
-// init-db.js
+const pool = require('./db')
 module.exports = async function initDatabase(pool) {
   try {
     // Users
