@@ -1,17 +1,12 @@
 const express = require('express');
-const pool = require('./db');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const path = require('path');
-const helmet = require('helmet');
-const fs = require('fs');
-require('dotenv').config();
-
-
+const pool = require('./db');
 const initDatabase = require('./init-db');
 
 const app = express();
 app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,7 +20,6 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: false }
 }));
-
 
 initDatabase(pool);
 pool.query('SELECT current_database(), current_schema()', (err, result) => {
