@@ -61,6 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
       clientsTable.appendChild(row)
     })
   }
+  console.log("Клиенты из API:", clients)
+
 
   async function loadClients() {
     try {
