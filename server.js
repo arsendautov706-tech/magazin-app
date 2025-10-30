@@ -199,9 +199,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// === API для клиентов ===
-
-// Получить список клиентов
 app.get('/clients', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM public.clients ORDER BY client_id DESC');
@@ -212,13 +209,11 @@ app.get('/clients', async (req, res) => {
   }
 });
 
-// Добавить клиента
 app.post('/clients', async (req, res) => {
   const { full_name, phone, email, segment } = req.body;
   if (!full_name) {
     return res.json({ success: false, message: 'ФИО обязательно' });
   }
-
   try {
     const result = await pool.query(
       `INSERT INTO public.clients (full_name, phone, email, segment)
@@ -232,39 +227,38 @@ app.post('/clients', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+
 app.post('/clients/delete', async (req, res) => {
-  const { id } = req.body
+  const { id } = req.body;
   try {
-    await pool.query('DELETE FROM public.clients WHERE client_id = $1', [id])
-    res.json({ success: true })
+    await pool.query('DELETE FROM public.clients WHERE client_id = $1', [id]);
+    res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false })
+    console.error(err);
+    res.status(500).json({ success: false });
   }
-})
+});
 
 app.post('/clients/update', async (req, res) => {
-  const { id, full_name } = req.body
+  const { id, full_name } = req.body;
   try {
     await pool.query(
       'UPDATE public.clients SET full_name=$1 WHERE client_id=$2',
       [full_name, id]
-    )
-    res.json({ success: true })
+    );
+    res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false })
+    console.error(err);
+    res.status(500).json({ success: false });
   }
-})
+});
 
-
-// Поиск клиентов
 app.get('/clients/search', async (req, res) => {
   try {
     const { full_name, phone, email } = req.query;
-
     let query = 'SELECT * FROM public.clients WHERE 1=1';
     const params = [];
     let i = 1;
-
     if (full_name) {
       query += ` AND full_name ILIKE $${i++}`;
       params.push(`%${full_name}%`);
@@ -277,7 +271,6 @@ app.get('/clients/search', async (req, res) => {
       query += ` AND email = $${i++}`;
       params.push(email);
     }
-
     const result = await pool.query(query, params);
     res.json({ success: true, clients: result.rows });
   } catch (err) {
@@ -285,8 +278,6 @@ app.get('/clients/search', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
-
-
 
 
 app.get('/session', (req, res) => {
