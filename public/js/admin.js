@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${c.phone}</td>
         <td>${c.email}</td>
         <td>${c.segment || ""}</td>
-        <td>${c.bonuses || 0}</td>
+        <td>${c.bonus || 0}</td>
         <td>${c.purchases || 0}</td>
         <td></td>
       `
