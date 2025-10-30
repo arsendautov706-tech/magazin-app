@@ -56,13 +56,43 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${c.segment || ""}</td>
         <td>${c.bonus_points || 0}</td>
         <td>${c.total_purchases || 0}</td>
-        <td></td>
+        <td>
+          <button class="btn edit" data-id="${c.client_id}">✏️</button>
+          <button class="btn delete" data-id="${c.client_id}">❌</button>
+        </td>
       `
       clientsTable.appendChild(row)
     })
-  }
-  console.log("Клиенты из API:", clients)
 
+    document.querySelectorAll(".delete").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id
+        if (confirm("Удалить клиента?")) {
+          await fetch("/clients/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          })
+          await loadClients()
+        }
+      })
+    })
+
+    document.querySelectorAll(".edit").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id
+        const full_name = prompt("Введите новое ФИО:")
+        if (full_name) {
+          await fetch("/clients/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, full_name })
+          })
+          await loadClients()
+        }
+      })
+    })
+  }
 
   async function loadClients() {
     try {

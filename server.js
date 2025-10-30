@@ -232,6 +232,29 @@ app.post('/clients', async (req, res) => {
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
+app.post('/clients/delete', async (req, res) => {
+  const { id } = req.body
+  try {
+    await pool.query('DELETE FROM public.clients WHERE client_id = $1', [id])
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ success: false })
+  }
+})
+
+app.post('/clients/update', async (req, res) => {
+  const { id, full_name } = req.body
+  try {
+    await pool.query(
+      'UPDATE public.clients SET full_name=$1 WHERE client_id=$2',
+      [full_name, id]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ success: false })
+  }
+})
+
 
 // Поиск клиентов
 app.get('/clients/search', async (req, res) => {
