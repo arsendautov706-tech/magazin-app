@@ -191,7 +191,10 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/crm/clients', async (req, res) => {
+// === API для клиентов ===
+
+// Получить список клиентов
+app.get('/clients', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM public.clients ORDER BY client_id DESC');
     res.json({ success: true, clients: result.rows });
@@ -201,8 +204,8 @@ app.get('/crm/clients', async (req, res) => {
   }
 });
 
-
-app.post('/crm/clients/create', async (req, res) => {
+// Добавить клиента
+app.post('/clients', async (req, res) => {
   const { full_name, phone, email, segment } = req.body;
   if (!full_name) {
     return res.json({ success: false, message: 'ФИО обязательно' });
@@ -215,15 +218,15 @@ app.post('/crm/clients/create', async (req, res) => {
        RETURNING *`,
       [full_name, phone, email, segment]
     );
-
     res.json({ success: true, client: result.rows[0] });
   } catch (err) {
     console.error('Ошибка при добавлении клиента:', err);
     res.status(500).json({ success: false, message: 'Ошибка сервера' });
   }
 });
-// Универсальный поиск по имени, телефону или email
-app.get('/crm/clients/search', async (req, res) => {
+
+// Поиск клиентов
+app.get('/clients/search', async (req, res) => {
   try {
     const { full_name, phone, email } = req.query;
 
@@ -233,7 +236,7 @@ app.get('/crm/clients/search', async (req, res) => {
 
     if (full_name) {
       query += ` AND full_name ILIKE $${i++}`;
-      params.push(`%${full_name}%`); // поиск по части имени
+      params.push(`%${full_name}%`);
     }
     if (phone) {
       query += ` AND phone = $${i++}`;
@@ -245,7 +248,6 @@ app.get('/crm/clients/search', async (req, res) => {
     }
 
     const result = await pool.query(query, params);
-
     res.json({ success: true, clients: result.rows });
   } catch (err) {
     console.error('Ошибка при поиске клиента:', err);
