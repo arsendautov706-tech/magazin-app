@@ -34,10 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveClient = document.getElementById("saveClient")
   const clientsTable = document.getElementById("clientsTable")
 
-  const searchBtn = document.getElementById("searchClientBtn")
-  const searchName = document.getElementById("searchName")
-  const searchPhone = document.getElementById("searchPhone")
-  const searchEmail = document.getElementById("searchEmail")
+  const clientSearch = document.getElementById("clientSearch")
+  const segmentFilter = document.getElementById("segmentFilter")
 
   function openModal() { clientModal.style.display = "flex" }
   function closeModal() { clientModal.style.display = "none" }
@@ -136,22 +134,23 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-  if (searchBtn) {
-    searchBtn.addEventListener("click", async () => {
-      const params = new URLSearchParams()
-      if (searchName.value.trim()) params.append("full_name", searchName.value.trim())
-      if (searchPhone.value.trim()) params.append("phone", searchPhone.value.trim())
-      if (searchEmail.value.trim()) params.append("email", searchEmail.value.trim())
+  if (clientSearch || segmentFilter) {
+    ;[clientSearch, segmentFilter].forEach(el => {
+      if (el) el.addEventListener("input", async () => {
+        const params = new URLSearchParams()
+        if (clientSearch.value.trim()) params.append("full_name", clientSearch.value.trim())
+        if (segmentFilter.value.trim()) params.append("segment", segmentFilter.value.trim())
 
-      try {
-        const res = await fetch(`/clients/search?${params.toString()}`)
-        if (res.ok) {
-          const data = await res.json()
-          renderClients(data.success ? data.clients : [])
+        try {
+          const res = await fetch(`/clients/search?${params.toString()}`)
+          if (res.ok) {
+            const data = await res.json()
+            renderClients(data.success ? data.clients : [])
+          }
+        } catch (e) {
+          console.error("Ошибка поиска клиентов", e)
         }
-      } catch (e) {
-        console.error("Ошибка поиска клиентов", e)
-      }
+      })
     })
   }
 })
