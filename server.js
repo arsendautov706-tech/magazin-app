@@ -12,6 +12,13 @@ if (!fs.existsSync(reportsDir)) {
   fs.mkdirSync(reportsDir);
 }
 
+app.use(express.static(path.join(__dirname, 'public')))
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'))
+})
+
+
 const app = express();
 app.set('trust proxy', 1);
 
